@@ -1,14 +1,147 @@
-\documentclass{article}
-\usepackage{graphicx} % Required for inserting images
+\documentclass[1col]{ceurart}
 
-\title{Rub al Khali iNaturalist paper}
-\author{Robert Hoehndorf}
-\date{December 2025}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Listing style for Turtle/SPARQL
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!10},
+    captionpos=b,
+    keywordstyle=\color{blue!60!black},
+    stringstyle=\color{red!60!black},
+    commentstyle=\color{green!40!black}
+}
 
 \begin{document}
+
+\copyrightyear{2026}
+\copyrightclause{Copyright for this paper by its authors. Use permitted under Creative Commons License Attribution 4.0 International (CC BY 4.0).}
+\conference{SWAT4HCLS 2026: Semantic Web Applications and Tools for Health Care and Life Sciences, February 16--19, 2026, Leiden, The Netherlands}
+
+\title{Ontological Modeling of Dynamic Biodiversity Consensus: An SIO-based Approach for the Empty Quarter}
+
+\author[1]{Robert Hoehndorf}[%
+    email=robert.hoehndorf@kaust.edu.sa,
+    url=https://bio-ontology.org,
+    orgname={King Abdullah University of Science and Technology (KAUST)},
+    orgaddress={Computational Bioscience Research Center, Thuwal, Saudi Arabia}
+]
+
+\begin{abstract}
+  The digitization of biodiversity in extreme environments, such as the Rub' al Khali (Empty Quarter), relies increasingly on citizen science platforms like iNaturalist. However, the data produced is not static; taxonomic identifications evolve through community consensus, creating a provenance challenge for the Semantic Web. We present a formal OWL-DL ontology rooted in the Semanticscience Integrated Ontology (SIO) to model this dynamic ecosystem. We distinguish between the TBox (defining the classes of consensus, evidence, and agents) and the ABox (the specific expedition observations). This distinction allows for reasoning over conflicting evidence and provides a rigorous structure for integrating "shifting" research-grade classifications into the Linked Open Data cloud.
+\end{abstract}
+
+\begin{keywords}
+  OWL-DL \sep
+  SIO \sep
+  Biodiversity \sep
+  Rub' al Khali \sep
+  TBox/ABox
+\end{keywords}
 
 \maketitle
 
 \section{Introduction}
+
+The Rub' al Khali, the world's largest sand desert, represents a significant data void in global biodiversity monitoring. To address this, we established a digitization project on iNaturalist seeded by research expeditions. While effective for data mobilization, the platform's consensus mechanism—where an observation's identity "flips" based on user voting—presents a semantic challenge. Existing Darwin Core mappings capture only the snapshot of the current state, losing the history of disagreement essential for scientific rigor.
+
+We propose a solution using **OWL-DL** (Web Ontology Language - Description Logic) aligned with the **Semanticscience Integrated Ontology (SIO)** \cite{sio}. By strictly separating the ontological schema (TBox) from the instance data (ABox), we enable automated reasoning to detect logical inconsistencies in taxonomic assertions.
+
+\section{Ontology Engineering (TBox)}
+
+The TBox defines the structural invariants of our domain. We align our classes with SIO to ensure interoperability.
+
+\subsection{SIO Alignment}
+
+We map the core iNaturalist concepts to SIO classes as follows:
+
+\begin{itemize}
+    \item \textbf{Observation}: Mapped to \texttt{sio:observation} (SIO\_001080).
+    \item \textbf{Identification Act}: Mapped to \texttt{sio:classifying} (SIO\_001000).
+    \item \textbf{Taxon Concept}: Mapped to \texttt{sio:class} (SIO\_000275), treated as an instance of a metaclass in the ABox or punned.
+    \item \textbf{Agent}: Mapped to \texttt{sio:agent} (SIO\_000010).
+\end{itemize}
+
+\subsection{Description Logic Axioms}
+
+We define the concept of an \texttt{IdentificationAssertion} as a process that links an Agent to a Taxon concerning a specific Observation.
+
+\begin{equation}
+    \texttt{IdentificationAssertion} \sqsubseteq \texttt{sio:process} \sqcap \exists \texttt{sio:has-agent}.\texttt{sio:Agent} \sqcap \exists \texttt{sio:has-output}.\texttt{TaxonDetermination}
+\end{equation}
+
+Critically, we model the \textit{state} of the observation (Research Grade vs. Needs ID) not as a static property, but as a defined class based on the aggregation of assertions.
+
+\begin{equation}
+    \texttt{ConflictingObservation} \equiv \texttt{sio:observation} \sqcap \exists \texttt{has-identification}.(\texttt{TaxonA}) \sqcap \exists \texttt{has-identification}.(\texttt{TaxonB}) \sqcap (\texttt{TaxonA} \neq \texttt{TaxonB})
+\end{equation}
+
+This axiom allows a reasoner to automatically classify any ABox instance with disparate identification outputs as a \texttt{ConflictingObservation}, flagging it for expert review.
+
+\section{Instantiation (ABox)}
+
+The ABox contains the assertions derived from the Rub' al Khali project (\url{https://www.inaturalist.org/projects/rub-al-khali}).
+
+\subsection{Data Provenance}
+The project currently holds observations from recent expeditions. About 25\% are "Research Grade." The ABox is populated by an ETL pipeline that converts the iNaturalist API JSON response into RDF triples.
+
+\subsection{Example Instance}
+Below is a simplified Turtle representation of a specific observation (\texttt{obs:1942}) showing the TBox instantiation.
+
+\begin{lstlisting}[language=SPARQL, caption=ABox instance of a disputed identification]
+@prefix sio: <http://semanticscience.org/resource/> .
+@prefix ex: <http://example.org/rub-al-khali/> .
+@prefix dwc: <http://rs.tdwg.org/dwc/terms/> .
+
+# The Observation Instance
+ex:obs_1942 a sio:observation ;
+    rdfs:label "Cornulaca arabica observation" ;
+    dwc:decimalLatitude "20.123" ;
+    dwc:decimalLongitude "50.456" .
+
+# Identification Act 1 (The Author)
+ex:id_act_1 a ex:IdentificationAssertion ;
+    sio:has-agent ex:agent_rhoehndorf ;
+    sio:has-target ex:obs_1942 ;
+    sio:has-output ex:taxon_cornulaca_arabica .
+
+# Identification Act 2 (Community Disagreement)
+ex:id_act_2 a ex:IdentificationAssertion ;
+    sio:has-agent ex:agent_community_user ;
+    sio:has-target ex:obs_1942 ;
+    sio:has-output ex:taxon_cornulaca_monacantha .
+
+# Resulting Inferred Status (via Reasoner)
+# ex:obs_1942 rdf:type ex:ConflictingObservation .
+\end{lstlisting}
+
+\section{Discussion and Conclusion}
+
+By distinguishing between the TBox (the logic of consensus) and the ABox (the expedition data), we gain several advantages over flat metadata schemas:
+\begin{enumerate}
+    \item \textbf{Monotonicity:} New identifications are simply added to the ABox. The reasoner infers the change in status (e.g., from Research Grade to Conflict) without deleting prior assertions.
+    \item \textbf{Querying Disagreement:} We can write SPARQL queries to extract only those instances in the Empty Quarter where specific experts disagree, prioritizing them for DNA barcoding.
+\end{enumerate}
+
+This approach ensures that the digital representation of the Rub' al Khali's flora is not just a static archive, but a living knowledge graph that accurately reflects the scientific process of identification.
+
+\begin{thebibliography}{4}
+
+\bibitem{sio}
+Dumontier, M., et al.: The Semanticscience Integrated Ontology (SIO) for biomedical research and knowledge discovery. Journal of Biomedical Semantics 5, 14 (2014).
+
+\bibitem{inat}
+iNaturalist: A Community for Naturalists. \url{https://www.inaturalist.org}.
+
+\bibitem{dwc}
+Wieczorek, J., et al.: Darwin Core: An Evolving Community-Developed Biodiversity Data Standard. PLoS ONE 7(1), e29715 (2012).
+
+\bibitem{owl}
+Hitzler, P., et al.: OWL 2 Web Ontology Language Primer. W3C Recommendation (2009).
+
+\end{thebibliography}
 
 \end{document}
