@@ -171,46 +171,66 @@ This approach allows the ABox to contain contradictory evidence
 flag the observation for review.
 
 
-
+Here is the clean, rewritten Results: Instantiation (ABox) section without any citation markers, ready for compilation.
+Code snippet
 
 \section{Results: Instantiation (ABox)}
 
-The ABox contains the assertions derived from the Rub' al Khali project (\url{https://www.inaturalist.org/projects/rub-al-khali}).
+The ABox contains the assertions derived from the Rub' al Khali project on iNaturalist (\url{https://www.inaturalist.org/projects/rub-al-khali}).
 
 \subsection{Data Provenance}
 We extracted data from the iNaturalist project, which serves as a central aggregation point for biodiversity in the region. As of February 2026, the dataset comprises \textbf{[INSERT OBS COUNT]} observations and \textbf{[INSERT ID COUNT]} identifications. These records define a baseline for the Empty Quarter's flora and fauna. Notably, approximately \textbf{[25\%]} of these observations have achieved "Research Grade" status via community consensus.
 
 We employ an ETL pipeline to convert the iNaturalist API JSON response into RDF triples, linking the data to the Global Biodiversity Information Facility (GBIF, \url{https://www.gbif.org}) backbone where applicable.
 
-\subsection{Example Instance}
-Below is a simplified Turtle representation of a specific observation (\texttt{obs:1942}) showing the TBox instantiation.
+\subsection{Example Instance: The Evolution of Consensus}
+The following Turtle snippet demonstrates how we capture the history
+of a revision: an agent initially identifying a specimen as a generic
+genus, and later refining it to a species that conflicts with another
+expert. The example below explicitly models the temporal sequence of
+events ($T_1 \rightarrow T_2 \rightarrow T_3$) and the resulting shift
+in consensus state.
 
-\begin{lstlisting}[language=SPARQL, caption=ABox instance of a disputed identification]
+\begin{lstlisting}[language=SPARQL, caption=ABox instance showing revision and conflict]
 @prefix sio: <http://semanticscience.org/resource/> .
 @prefix ex: <http://example.org/rub-al-khali/> .
-@prefix dwc: <http://rs.tdwg.org/dwc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-# The Observation Instance
+# The Observation (Biological Reality)
 ex:obs_1942 a sio:observation ;
-    rdfs:label "Cornulaca arabica observation" ;
-    dwc:decimalLatitude "20.123" ;
-    dwc:decimalLongitude "50.456" .
+    rdfs:label "Desert Shrub Observation" .
 
-# Identification Act 1 (The Author)
-ex:id_act_1 a ex:IdentificationAssertion ;
-    sio:has-agent ex:agent_rhoehndorf ;
+# --- TIME T1: Agent A identifies as Genus Cornulaca ---
+ex:id_act_1 a ex:IdentificationAct ;
+    sio:has-agent ex:agent_A ;
     sio:has-target ex:obs_1942 ;
-    sio:has-output ex:taxon_cornulaca_arabica .
+    sio:has-output ex:taxon_Cornulaca ; # Genus level
+    sio:has-value "2025-01-10T10:00:00"^^xsd:dateTime .
 
-# Identification Act 2 (Community Disagreement)
-ex:id_act_2 a ex:IdentificationAssertion ;
-    sio:has-agent ex:agent_community_user ;
+# --- TIME T2: Agent B identifies as Species C. monacantha ---
+ex:id_act_2 a ex:IdentificationAct ;
+    sio:has-agent ex:agent_B ;
     sio:has-target ex:obs_1942 ;
-    sio:has-output ex:taxon_cornulaca_monacantha .
+    sio:has-output ex:taxon_Cornulaca_monacantha ;
+    sio:has-value "2025-01-11T14:30:00"^^xsd:dateTime .
+    # Note: Compatible with Act 1 (Species is sub-class of Genus)
 
-# Resulting Inferred Status (via Reasoner)
-# ex:obs_1942 rdf:type ex:ConflictingObservation .
+# --- TIME T3: Agent A Revises to Species C. arabica ---
+ex:id_act_3 a ex:IdentificationAct ;
+    sio:has-agent ex:agent_A ;
+    sio:has-target ex:obs_1942 ;
+    sio:has-output ex:taxon_Cornulaca_arabica ;
+    sio:has-value "2025-01-12T09:15:00"^^xsd:dateTime ;
+    sio:is-successor-of ex:id_act_1 . 
+    # Logic: Act 1 is superseded. Conflict is now between Act 2 and Act 3.
+
+# --- INFERENCE RESULT ---
+# Since C. arabica and C. monacantha are disjoint:
+# ex:obs_1942 a ex:ConflictingObservation .
 \end{lstlisting}
+
+This modeling approach ensures that while the ABox contains contradictory evidence (Act 2 vs. Act 3), the logical integrity of the Observation entity is preserved, and the conflict is flagged for review.
+
 
 \section{Discussion and Conclusion}
 
