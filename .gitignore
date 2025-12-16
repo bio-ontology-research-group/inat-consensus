@@ -1,0 +1,10 @@
+ncbitaxon.obo
+project/projects_data/
+project/.gradle/
+project/build/
+*.owl
+*.obo
+*.rdf
+project/projects_data/
+project/.gradle/
+project/build/

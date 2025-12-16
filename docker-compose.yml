@@ -1,0 +1,14 @@
+version: '3'
+services:
+  virtuoso:
+    image: tenforce/virtuoso
+    ports:
+      - "8890:8890"
+      - "1111:1111"
+    environment:
+      SPARQL_UPDATE: "true"
+      DEFAULT_GRAPH: "http://example.org/rub-al-khali"
+      VIRT_Parameters_NumberOfBuffers: 10000
+      VIRT_Parameters_MaxDirtyBuffers: 6000
+    volumes:
+      - ./project:/data

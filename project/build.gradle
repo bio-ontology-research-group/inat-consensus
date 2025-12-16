@@ -1,0 +1,34 @@
+plugins {
+    id 'groovy'
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.codehaus.groovy:groovy-all:3.0.17'
+    implementation 'net.sourceforge.owlapi:owlapi-distribution:4.5.26'
+    implementation 'net.sourceforge.owlapi:org.semanticweb.hermit:1.4.3.456'
+    implementation 'org.slf4j:slf4j-simple:2.0.7'
+}
+
+application {
+    mainClass = 'org.example.BiodiversityProject'
+}
+
+run {
+    jvmArgs = ['-Xmx8g', '--add-opens', 'java.base/java.lang=ALL-UNNAMED']
+    if (project.hasProperty('args')) {
+        args project.args.split('\\s+')
+    }
+}
+
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['src/main/groovy']
+        }
+    }
+}

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biodiversity Consensus Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Biodiversity Consensus</h1>
+        <div class="project-controls">
+            <select id="project-selector" onchange="switchProject(this.value)">
+                <option value="" disabled selected>Select a Project</option>
+            </select>
+            <button onclick="showAddModal()">+ New Project</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="status-bar" style="display:none; background: #e8f5e9; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+            <strong>Status:</strong> <span id="status-msg"></span>
+        </div>
+
+        <section id="stats">
+            <h2>Live Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card" id="stat-obs">
+                    <h3>Observations</h3>
+                    <p class="loading">-</p>
+                </div>
+                <div class="stat-card" id="stat-conflicts">
+                    <h3>Conflicts</h3>
+                    <p class="loading">-</p>
+                </div>
+                <div class="stat-card" id="stat-taxa">
+                    <h3>Active Taxa</h3>
+                    <p class="loading">-</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="conflicts-view">
+            <h2>Epistemic Conflicts</h2>
+            <p>Observations where active identifications disagree on incompatible taxa.</p>
+            <div id="conflicts-list" class="grid-list">
+                <!-- Conflicts injected here -->
+            </div>
+        </section>
+
+        <section id="sparql-playground">
+            <h2>SPARQL Playground</h2>
+            <p>Querying graph: <code id="current-graph-uri">ALL</code></p>
+            <textarea id="sparql-input">
+PREFIX ex: <http://example.org/biodiversity/>
+PREFIX sio: <http://semanticscience.org/resource/>
+
+SELECT ?taxon (COUNT(?act) AS ?count)
+WHERE {
+  ?act a ex:ActiveIdentification ;
+       sio:has-output ?taxon .
+}
+GROUP BY ?taxon
+ORDER BY DESC(?count)
+LIMIT 5
+            </textarea>
+            <button onclick="runQuery()">Run Query</button>
+            <div id="sparql-result"></div>
+        </section>
+    </main>
+    
+    <!-- Add Project Modal -->
+    <div id="add-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddModal()">&times;</span>
+            <h2>Add iNaturalist Project</h2>
+            <p>Enter the project slug from the iNaturalist URL (e.g., <code>rub-al-khali</code>).</p>
+            <input type="text" id="new-slug" placeholder="project-slug">
+            <button onclick="addProject()">Build Knowledge Graph</button>
+        </div>
+    </div>
+
+    <script>
+        const PREFIXES = `
+PREFIX sio: <http://semanticscience.org/resource/>
+PREFIX ex: <http://example.org/biodiversity/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+`;
+        let currentProject = null;
+        let activeProjects = [];
+        let statuses = {};
+
+        // Polling
+        setInterval(refreshProjects, 5000);
+
+        async function refreshProjects() {
+            const res = await fetch('/projects');
+            const data = await res.json();
+            activeProjects = data.active;
+            statuses = data.status;
+            
+            const sel = document.getElementById('project-selector');
+            const currentVal = sel.value;
+            
+            // Rebuild options but keep selection
+            // Or just add new ones
+            activeProjects.forEach(p => {
+                if (!sel.querySelector(`option[value="${p}"]`)) {
+                    const opt = document.createElement('option');
+                    opt.value = p;
+                    opt.textContent = p;
+                    sel.appendChild(opt);
+                }
+            });
+            
+            // Check status of current project if building
+            if (currentProject && statuses[currentProject]) {
+                const s = statuses[currentProject];
+                const bar = document.getElementById('status-bar');
+                const msg = document.getElementById('status-msg');
+                
+                if (s.status === 'building' || s.status === 'loading') {
+                    bar.style.display = 'block';
+                    bar.style.backgroundColor = '#fff3e0'; // Orange
+                    msg.textContent = `Building '${currentProject}': ${s.msg}`;
+                } else if (s.status === 'ready') {
+                    bar.style.display = 'block';
+                    bar.style.backgroundColor = '#e8f5e9'; // Green
+                    msg.textContent = `'${currentProject}' is ready.`;
+                    // If we just finished building and user is on it, refresh stats
+                    // Hacky check: we don't know if we just finished or were always ready.
+                    // But loading stats is cheap.
+                } else if (s.status === 'error') {
+                    bar.style.display = 'block';
+                    bar.style.backgroundColor = '#ffebee'; // Red
+                    msg.textContent = `Error '${currentProject}': ${s.msg}`;
+                }
+            }
+        }
+
+        async function switchProject(slug) {
+            currentProject = slug;
+            document.getElementById('current-graph-uri').textContent = `http://example.org/biodiversity/${slug}`;
+            
+            // Clear current view
+            document.querySelector('#stat-obs p').textContent = 'Loading...';
+            document.querySelector('#stat-conflicts p').textContent = 'Loading...';
+            document.querySelector('#stat-taxa p').textContent = 'Loading...';
+            document.getElementById('conflicts-list').innerHTML = '';
+            
+            loadStats();
+            loadConflicts();
+        }
+
+        async function fetchSPARQL(query) {
+            const body = { query: PREFIXES + query };
+            if (currentProject) body.project = currentProject;
+            
+            const response = await fetch('/query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            return await response.json();
+        }
+
+        async function loadStats() {
+            if (!currentProject) return;
+            
+            // Count Obs
+            const qObs = `SELECT (COUNT(?s) AS ?count) WHERE { ?s a sio:Observation }`;
+            const rObs = await fetchSPARQL(qObs);
+            if(rObs.results) document.querySelector('#stat-obs p').textContent = rObs.results.bindings[0].count.value;
+
+            // Count Conflicts
+            const qConf = `SELECT (COUNT(?s) AS ?count) WHERE { ?s a ex:ConflictingObservation }`;
+            const rConf = await fetchSPARQL(qConf);
+            if(rConf.results) document.querySelector('#stat-conflicts p').textContent = rConf.results.bindings[0].count.value;
+            
+            // Count Taxa
+            const qTaxa = `SELECT (COUNT(DISTINCT ?t) AS ?count) WHERE { ?s a ex:ActiveIdentification ; sio:has-output ?t }`;
+            const rTaxa = await fetchSPARQL(qTaxa);
+            if(rTaxa.results) document.querySelector('#stat-taxa p').textContent = rTaxa.results.bindings[0].count.value;
+        }
+
+        async function loadConflicts() {
+            if (!currentProject) return;
+            const query = `
+                SELECT ?obs ?obsInd
+                WHERE {
+                    ?obsInd a ex:ConflictingObservation .
+                    BIND(STRAFTER(STR(?obsInd), "obs_") AS ?obs)
+                }
+                LIMIT 6
+            `;
+            const data = await fetchSPARQL(query);
+            const container = document.getElementById('conflicts-list');
+            container.innerHTML = '';
+            
+            if (!data.results || !data.results.bindings || data.results.bindings.length === 0) {
+                container.innerHTML = '<p>No conflicts detected in this dataset.</p>';
+                return;
+            }
+
+            for (const row of data.results.bindings) {
+                const obsId = row.obs.value;
+                const card = document.createElement('div');
+                card.className = 'obs-card';
+                card.innerHTML = `<h3>Observation ${obsId}</h3><p>Loading metadata...</p>`;
+                container.appendChild(card);
+                
+                // Fetch iNaturalist Metadata for Image
+                fetch(`https://api.inaturalist.org/v1/observations/${obsId}`)
+                    .then(r => r.json())
+                    .then(inat => {
+                        if(inat.results && inat.results.length > 0) {
+                            const o = inat.results[0];
+                            const imgUrl = o.photos.length > 0 ? o.photos[0].url.replace('square', 'medium') : '';
+                            card.innerHTML = `
+                                <img src="${imgUrl}" alt="Observation Photo">
+                                <div class="card-content">
+                                    <h3><a href="https://www.inaturalist.org/observations/${obsId}" target="_blank">Observation ${obsId}</a></h3>
+                                    <p><strong>User:</strong> ${o.user.login}</p>
+                                    <p><strong>Taxon:</strong> ${o.taxon ? o.taxon.name : 'Unknown'}</p>
+                                    <span class="badge conflict">CONFLICT DETECTED</span>
+                                </div>
+                            `;
+                        }
+                    });
+            }
+        }
+
+        async function runQuery() {
+            const q = document.getElementById('sparql-input').value;
+            const resDiv = document.getElementById('sparql-result');
+            resDiv.textContent = "Running...";
+            
+            const body = { query: q };
+            if (currentProject) body.project = currentProject;
+
+            try {
+                const response = await fetch('/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await response.json();
+                
+                if (data.error) {
+                    resDiv.textContent = "Error: " + data.error;
+                    return;
+                }
+                
+                const vars = data.head.vars;
+                let html = '<table><thead><tr>' + vars.map(v => `<th>${v}</th>`).join('') + '</tr></thead><tbody>';
+                data.results.bindings.forEach(row => {
+                    html += '<tr>' + vars.map(v => `<td>${row[v] ? row[v].value : ''}</td>`).join('') + '</tr>';
+                });
+                html += '</tbody></table>';
+                resDiv.innerHTML = html;
+            } catch (e) {
+                resDiv.textContent = "Error: " + e;
+            }
+        }
+
+        // Modal Logic
+        function showAddModal() { document.getElementById('add-modal').style.display = 'block'; }
+        function closeAddModal() { document.getElementById('add-modal').style.display = 'none'; }
+        
+        async function addProject() {
+            const slug = document.getElementById('new-slug').value;
+            if(!slug) return;
+            
+            const res = await fetch('/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ slug: slug })
+            });
+            const data = await res.json();
+            
+            closeAddModal();
+            refreshProjects();
+            
+            // Auto switch to it? Or wait? 
+            // Better to select it so user sees status bar
+            if (!activeProjects.includes(slug)) {
+               // Fake add to list to allow selection immediately
+               const sel = document.getElementById('project-selector');
+               const opt = document.createElement('option');
+               opt.value = slug;
+               opt.textContent = slug;
+               sel.appendChild(opt);
+            }
+            document.getElementById('project-selector').value = slug;
+            switchProject(slug);
+        }
+
+        refreshProjects().then(() => {
+            // If Rub al Khali exists (should), select it by default
+            if (activeProjects.includes('rub-al-khali')) {
+                document.getElementById('project-selector').value = 'rub-al-khali';
+                switchProject('rub-al-khali');
+            }
+        });
+    </script>
+</body>
+</html>
