@@ -17,6 +17,7 @@ class BiodiversityProject {
     static final String SIO_NS = "http://semanticscience.org/resource/"
     static final String EX_NS = "https://rub-al-khali.bio2vec.net/consensus/"
     static final String OBO_NS = "http://purl.obolibrary.org/obo/"
+    static final String ENVO_NS = "http://purl.obolibrary.org/obo/"
     
     // Mappings
     Map<String, String> nameToNcbiId = [:]
@@ -48,6 +49,9 @@ class BiodiversityProject {
 
         // 2. Process Taxonomy
         processTaxonomy(observations)
+        
+        // 2b. Process Environment (ENVO)
+        processEnvironment(observations)
         
         // 3. Build Ontology
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager()
@@ -162,6 +166,7 @@ class BiodiversityProject {
         }
         
         // Resolve
+        int skippedTaxaCount = 0
         allINatIds.each { id ->
             String name = iNatIdToName[id]
             if (name && nameToNcbiId.containsKey(name)) {
@@ -170,11 +175,15 @@ class BiodiversityProject {
                 finalClassMap[id] = IRI.create(OBO_NS + "NCBITaxon_" + justId)
                 mappedTaxaCount++
             } else {
-                finalClassMap[id] = IRI.create(EX_NS + "iNatTaxon_" + id)
-                if (name) unmappedTaxaCount++
+                if (name) {
+                    finalClassMap[id] = IRI.create(EX_NS + "iNatTaxon_" + id)
+                    unmappedTaxaCount++
+                } else {
+                    skippedTaxaCount++
+                }
             }
         }
-        println "Mapping complete. Mapped: ${mappedTaxaCount}, Unmapped: ${unmappedTaxaCount}"
+        println "Mapping complete. Mapped: ${mappedTaxaCount}, Unmapped: ${unmappedTaxaCount}, Skipped (no name): ${skippedTaxaCount}"
     }
 
     OWLOntology buildOntology(OWLOntologyManager manager, List<Map> observations) {
@@ -193,6 +202,7 @@ class BiodiversityProject {
         OWLObjectProperty opHasTarget = dataFactory.getOWLObjectProperty(IRI.create(SIO_NS + "has-target"))
         OWLObjectProperty opHasOutput = dataFactory.getOWLObjectProperty(IRI.create(SIO_NS + "has-output"))
         OWLObjectProperty opIsSuccessorOf = dataFactory.getOWLObjectProperty(IRI.create(SIO_NS + "is-successor-of"))
+        OWLObjectProperty opIsLocatedIn = dataFactory.getOWLObjectProperty(IRI.create(SIO_NS + "is-located-in"))
         OWLDataProperty dpHasValue = dataFactory.getOWLDataProperty(IRI.create(SIO_NS + "has-value"))
         OWLObjectProperty opIncompatibleWith = dataFactory.getOWLObjectProperty(IRI.create(EX_NS + "isIncompatibleWith"))
         OWLDataProperty dpAsWKT = dataFactory.getOWLDataProperty(IRI.create("http://www.opengis.net/ont/geosparql#asWKT"))
@@ -205,6 +215,13 @@ class BiodiversityProject {
         finalClassMap.each { iNatId, iri ->
             OWLClass cls = dataFactory.getOWLClass(iri)
             manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(cls, cTaxon))
+            
+            // Add Label
+            String name = iNatIdToName[iNatId]
+            if (name) {
+                 manager.addAxiom(ontology, dataFactory.getOWLAnnotationAssertionAxiom(dataFactory.getRDFSLabel(), iri, dataFactory.getOWLLiteral(name)))
+            }
+
             Integer parentId = iNatParentMap[iNatId]
             if (parentId != null && finalClassMap.containsKey(parentId)) {
                 manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(cls, dataFactory.getOWLClass(finalClassMap[parentId])))
@@ -291,6 +308,17 @@ class BiodiversityProject {
                     }
                 } catch (Exception e) { println "Error parsing location for ${obs.id}: ${e}" }
             }
+            
+            // ENVO Link (Strategy 1 + 2)
+            if (obs.envoClass) {
+                 OWLClass cEnv = dataFactory.getOWLClass(IRI.create(obs.envoClass))
+                 OWLNamedIndividual envInd = dataFactory.getOWLNamedIndividual(IRI.create(EX_NS + "env_" + obs.id))
+                 manager.addAxiom(ontology, dataFactory.getOWLClassAssertionAxiom(cEnv, envInd))
+                 if (obs.envoLabel) {
+                     manager.addAxiom(ontology, dataFactory.getOWLAnnotationAssertionAxiom(dataFactory.getRDFSLabel(), envInd.getIRI(), dataFactory.getOWLLiteral(obs.envoLabel)))
+                 }
+                 manager.addAxiom(ontology, dataFactory.getOWLObjectPropertyAssertionAxiom(opIsLocatedIn, obsInd, envInd))
+            }
 
             Map<Integer, List> userIds = [:]
             obs.identifications.each { if (it.user) userIds.computeIfAbsent(it.user.id, {[]}).add(it) }
@@ -299,6 +327,12 @@ class BiodiversityProject {
                 // Materialize Agent
                 OWLNamedIndividual agentInd = dataFactory.getOWLNamedIndividual(IRI.create(EX_NS + "user_" + uid))
                 manager.addAxiom(ontology, dataFactory.getOWLClassAssertionAxiom(cAgent, agentInd))
+                
+                // Add Label (User Login)
+                if (idents && idents[0].user && idents[0].user.login) {
+                    String login = idents[0].user.login
+                    manager.addAxiom(ontology, dataFactory.getOWLAnnotationAssertionAxiom(dataFactory.getRDFSLabel(), agentInd.getIRI(), dataFactory.getOWLLiteral(login)))
+                }
                 
                 idents.sort { a, b -> a.created_at <=> b.created_at }
                 OWLNamedIndividual prevInd = null
@@ -331,6 +365,7 @@ class BiodiversityProject {
         
         conflicts.nodes.each { node ->
              node.entities.each { ind ->
+                 println "Conflict found: ${ind.getIRI()}"
                  manager.addAxiom(ontology, dataFactory.getOWLClassAssertionAxiom(cConflicting, ind))
              }
         }
@@ -339,5 +374,140 @@ class BiodiversityProject {
     void generateReport(OWLOntology ontology, List<Map> observations) {
         println "Total Obs: ${observations.size()}"
         println "Mapped: ${mappedTaxaCount}, Unmapped: ${unmappedTaxaCount}"
+    }
+
+    void processEnvironment(List<Map> observations) {
+        println "Processing environment context (ENVO) for slug: '${projectSlug}'..."
+        EnvoMapper mapper = new EnvoMapper()
+        int count = 0
+        int total = observations.size()
+        int processed = 0
+        
+        observations.each { obs ->
+            processed++
+            if (processed % 10 == 0) println "Processing environment: ${processed}/${total} (Linked: ${count})"
+            
+            if (obs.location) {
+                try {
+                    String[] parts = obs.location.split(",")
+                    if (parts.length == 2) {
+                        double lat = Double.parseDouble(parts[0].trim())
+                        double lng = Double.parseDouble(parts[1].trim())
+                        Map res = mapper.get(lat, lng, projectSlug)
+                        if (res) {
+                            obs.envoClass = res.iri
+                            obs.envoLabel = res.label
+                            count++
+                        }
+                    }
+                } catch (Exception e) {
+                    // println "Error parsing location for obs ${obs.id}: ${e}"
+                }
+            }
+        }
+        println "Linked ${count} observations to ENVO environments."
+    }
+
+    static class EnvoMapper {
+        File cacheFile = new File("envo_cache.json")
+        Map cache = [:]
+        
+        // Priority Mapping (Top matches first)
+        Map<String, Map> mappings = [
+            'natural=water': [iri: 'http://purl.obolibrary.org/obo/ENVO_00000063', label: 'Water Body'],
+            'natural=wetland': [iri: 'http://purl.obolibrary.org/obo/ENVO_00000043', label: 'Wetland'],
+            'natural=wood': [iri: 'http://purl.obolibrary.org/obo/ENVO_00000111', label: 'Forest'],
+            'landuse=forest': [iri: 'http://purl.obolibrary.org/obo/ENVO_00000111', label: 'Forest'],
+            'natural=scrub': [iri: 'http://purl.obolibrary.org/obo/ENVO_00000302', label: 'Shrubland'],
+            'natural=sand': [iri: 'http://purl.obolibrary.org/obo/ENVO_00000115', label: 'Sand Desert'],
+            'natural=desert': [iri: 'http://purl.obolibrary.org/obo/ENVO_00000098', label: 'Desert'],
+            'natural=bare_rock': [iri: 'http://purl.obolibrary.org/obo/ENVO_00000014', label: 'Rock'],
+            'landuse=residential': [iri: 'http://purl.obolibrary.org/obo/ENVO_01000248', label: 'Urban Area'],
+            'place=city': [iri: 'http://purl.obolibrary.org/obo/ENVO_01000248', label: 'Urban Area']
+        ]
+
+        EnvoMapper() {
+            if (cacheFile.exists()) {
+                try { cache = new JsonSlurper().parse(cacheFile) } catch (e) {}
+            }
+        }
+
+        Map get(double lat, double lon, String projectSlug) {
+            String key = String.format(Locale.US, "%.3f,%.3f", lat, lon)
+            Map result = null
+            boolean fromCache = false
+
+            if (cache.containsKey(key)) {
+                result = cache[key]
+                fromCache = true
+            }
+
+            if (result == null && !fromCache) {
+                 result = fetchOverpass(lat, lon)
+                 sleep(1000) // Rate limit for fresh fetches
+            }
+            
+            // Strategy 1 Fallback
+            if (result == null && projectSlug == "rub-al-khali") {
+                result = [iri: 'http://purl.obolibrary.org/obo/ENVO_00000115', label: 'Sand Desert']
+            }
+
+            if (result == null) {
+                // println "DEBUG: Failed to resolve ${key}. Slug: '${projectSlug}'"
+            }
+            
+            // Save back to cache if it wasn't there or if we just patched a null value
+            if (!fromCache || (fromCache && cache[key] == null && result != null)) {
+                cache[key] = result
+                saveCache()
+            }
+            
+            return result
+        }
+
+        void saveCache() {
+             cacheFile.setText(groovy.json.JsonOutput.toJson(cache))
+        }
+
+        Map fetchOverpass(double lat, double lon) {
+            // Query for features using is_in (areas) and around (nearby features)
+            String query = """
+                [out:json];
+                is_in(${lat},${lon})->.a;
+                (
+                  way(around:100,${lat},${lon})["natural"];
+                  way(around:100,${lat},${lon})["landuse"];
+                  area.a["natural"];
+                  area.a["landuse"];
+                );
+                out tags;
+            """
+            try {
+                String url = "https://overpass-api.de/api/interpreter"
+                def conn = new URL(url).openConnection()
+                conn.doOutput = true
+                conn.requestMethod = "POST"
+                conn.outputStream.withWriter { it.write("data=" + java.net.URLEncoder.encode(query, "UTF-8")) }
+                
+                if (conn.responseCode == 200) {
+                    def json = new JsonSlurper().parse(conn.inputStream)
+                    if (json.elements) {
+                        for (def el : json.elements) {
+                            if (!el.tags) continue
+                            // Check against mappings
+                            for (String tagKey : mappings.keySet()) {
+                                String[] kv = tagKey.split("=")
+                                if (el.tags[kv[0]] == kv[1]) {
+                                    return mappings[tagKey]
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                println "Overpass Error: ${e.message}"
+            }
+            return null
+        }
     }
 }

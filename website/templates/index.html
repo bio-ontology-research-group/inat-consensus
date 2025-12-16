@@ -59,6 +59,7 @@
             <button class="tab-btn" onclick="switchTab('genomics')">Genomics</button>
             <button class="tab-btn" onclick="switchTab('federation')">Federation</button>
             <button class="tab-btn" onclick="switchTab('community')">Community</button>
+            <button class="tab-btn" onclick="switchTab('environment')">Environment</button>
         </nav>
 
         <!-- OVERVIEW TAB -->
@@ -108,6 +109,23 @@ LIMIT 5
                 <button onclick="runQuery()">Run Query</button>
                 <div id="sparql-result"></div>
             </section>
+        </div>
+
+        <!-- ENVIRONMENT TAB -->
+        <div id="tab-environment" class="tab-content">
+            <h2>Environmental Context (ENVO)</h2>
+            <p>Observations automatically linked to environmental features via OpenStreetMap and ENVO.</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Environments Found</h3>
+                    <div id="envo-stats-list">Loading...</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Recent ENVO Links</h3>
+                    <div id="envo-obs-list">Loading...</div>
+                </div>
+            </div>
         </div>
 
         <!-- GENOMICS TAB -->
@@ -210,6 +228,14 @@ LIMIT 5
         <!-- COMMUNITY TAB -->
         <div id="tab-community" class="tab-content">
             <h2>Community Analysis</h2>
+            
+            <div style="margin-bottom: 1rem; padding: 0.5rem; background: #f9f9f9; border: 1px solid #ddd;">
+                <label for="community-filter"><strong>Filter by Kingdom:</strong></label>
+                <select id="community-filter" onchange="loadCommunityStats()">
+                    <option value="">All Kingdoms</option>
+                </select>
+            </div>
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <h3>Top Experts</h3>
@@ -220,6 +246,12 @@ LIMIT 5
                     <div id="disagreement-list">Loading...</div>
                 </div>
             </div>
+            
+            <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #eee;">
+            
+            <h3>Taxonomic Change Analysis</h3>
+            <p>Analysis of how agents modify existing identifications (Causal Chain).</p>
+            <div id="change-analysis-list">Loading...</div>
         </div>
     </main>
     
@@ -516,6 +548,86 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
             if (tabId === 'genomics') loadGenomics();
             if (tabId === 'community') loadCommunity();
             if (tabId === 'federation') loadFederation();
+            if (tabId === 'environment') loadEnvironment();
+        }
+
+        async function loadEnvironment() {
+            if (!currentProject) return;
+            loadEnvoStats();
+            loadEnvoList();
+        }
+
+        async function loadEnvoStats() {
+             const container = document.getElementById('envo-stats-list');
+             const query = `
+                SELECT ?label (COUNT(?obs) AS ?count)
+                WHERE {
+                  ?obs sio:is-located-in ?env .
+                  ?env a ?type .
+                  FILTER(REGEX(STR(?type), "ENVO"))
+                  ?env rdfs:label ?label .
+                }
+                GROUP BY ?label
+                ORDER BY DESC(?count)
+             `;
+             
+             const data = await fetchSPARQL(query);
+             if (!data.results || data.results.bindings.length === 0) {
+                 container.innerHTML = '<p>No environmental data linked.</p>';
+                 return;
+             }
+             
+             let html = '<ul>';
+             data.results.bindings.forEach(row => {
+                 const label = row.label.value;
+                 const count = row.count.value;
+                 const sparqlLink = createSparqlLink("<small>[SPARQL]</small>", `SELECT ?obs WHERE { ?obs sio:is-located-in ?env . ?env rdfs:label "${label}" } LIMIT 100`);
+                 html += `<li><strong>${label}</strong>: ${count} observations ${sparqlLink}</li>`;
+             });
+             html += '</ul>';
+             container.innerHTML = html;
+        }
+
+        async function loadEnvoList() {
+             const container = document.getElementById('envo-obs-list');
+             const query = `
+                SELECT ?obs ?envLabel ?obsLabel
+                WHERE {
+                  ?obsInd sio:is-located-in ?env .
+                  ?env rdfs:label ?envLabel .
+                  
+                  # Try to get Taxon name if possible
+                  OPTIONAL {
+                      ?act sio:has-target ?obsInd ;
+                           a ex:ActiveIdentification ;
+                           sio:has-output ?taxon .
+                      ?taxon rdfs:label ?obsLabel .
+                  }
+                  
+                  BIND(STRAFTER(STR(?obsInd), "obs_") AS ?obs)
+                }
+                LIMIT 10
+             `;
+             
+             const data = await fetchSPARQL(query);
+             if (!data.results || data.results.bindings.length === 0) {
+                 container.innerHTML = '<p>No data found.</p>';
+                 return;
+             }
+             
+             let html = '<ul>';
+             data.results.bindings.forEach(row => {
+                 const obsId = row.obs.value;
+                 const env = row.envLabel.value;
+                 const taxon = row.obsLabel ? row.obsLabel.value : "Unknown Taxon";
+                 
+                 html += `<li>
+                    <a href="https://www.inaturalist.org/observations/${obsId}" target="_blank">Obs ${obsId}</a> 
+                    (${taxon}) &rarr; <strong>${env}</strong>
+                 </li>`;
+             });
+             html += '</ul>';
+             container.innerHTML = html;
         }
 
         async function loadGenomics() {
@@ -566,29 +678,174 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
 
         async function loadCommunity() {
             if (!currentProject) return;
+            await loadKingdoms();
+            loadCommunityStats();
+        }
+
+        function loadCommunityStats() {
             loadExperts();
             loadDisagreement();
+            loadChangeAnalysis();
+        }
+
+        async function loadKingdoms() {
+            const sel = document.getElementById('community-filter');
+            if (sel.options.length > 1) return; // Already loaded
+            
+            // Find roots: Taxa that are subclasses of sio:Taxon but NOT subclasses of any other Taxon (in this graph)
+            // Note: BiodiversityProject maps roots directly to sio:Taxon or NCBITaxon roots.
+            // A heuristic: Find things that are direct subclasses of sio:Taxon
+            const query = `
+                SELECT DISTINCT ?root ?label
+                WHERE {
+                    ?root rdfs:subClassOf sio:Taxon .
+                    OPTIONAL { ?root rdfs:label ?label }
+                }
+                ORDER BY ?label
+            `;
+            const data = await fetchSPARQL(query);
+            if (!data.results) return;
+            
+            data.results.bindings.forEach(row => {
+                 const iri = row.root.value;
+                 const label = row.label ? row.label.value : iri.split('_').pop();
+                 // Filter out structural classes if any mixed in
+                 if (!iri.includes("Taxon")) return; 
+                 
+                 const opt = document.createElement('option');
+                 opt.value = iri;
+                 opt.textContent = label;
+                 sel.appendChild(opt);
+            });
+        }
+
+        async function loadChangeAnalysis() {
+             const container = document.getElementById('change-analysis-list');
+             const filterUri = document.getElementById('community-filter').value;
+             let filterClause = "";
+             if (filterUri) {
+                 filterClause = `?newTaxon rdfs:subClassOf* <${filterUri}> .`;
+             }
+
+             const query = `
+                SELECT ?agent ?label
+                       (COUNT(?newId) AS ?total)
+                       (SUM(IF(?isRefinement, 1, 0)) AS ?refinements)
+                       (SUM(IF(?isCoarsening, 1, 0)) AS ?coarsenings)
+                       (SUM(IF(?isConflict, 1, 0)) AS ?flips)
+                WHERE {
+                  ?newId sio:is-successor-of ?oldId ;
+                         sio:has-agent ?agent ;
+                         sio:has-output ?newTaxon .
+                  ?oldId sio:has-output ?oldTaxon .
+                  
+                  ${filterClause}
+                  
+                  OPTIONAL { ?agent rdfs:label ?label }
+
+                  BIND(EXISTS { ?newTaxon rdfs:subClassOf+ ?oldTaxon } AS ?isRefinement)
+                  BIND(EXISTS { ?oldTaxon rdfs:subClassOf+ ?newTaxon } AS ?isCoarsening)
+                  BIND(EXISTS { ?newTaxon ex:isIncompatibleWith ?oldTaxon } AS ?isConflict)
+                }
+                GROUP BY ?agent ?label
+                ORDER BY DESC(?total)
+                LIMIT 20
+             `;
+             
+             const data = await fetchSPARQL(query);
+             container.innerHTML = '';
+             if (!data.results || data.results.bindings.length === 0) {
+                 container.innerHTML = '<p>No history of changes found for this selection.</p>';
+                 return;
+             }
+             
+             let html = '<table><thead><tr><th>User Name</th><th>Total Changes</th><th>Refinements (More Specific)</th><th>Coarsenings (Less Specific)</th><th>Flips (Incompatible)</th><th>Actions</th></tr></thead><tbody>';
+             data.results.bindings.forEach(row => {
+                 const agentIri = row.agent.value;
+                 const name = row.label ? row.label.value : agentIri.split('_').pop();
+                 
+                 // SPARQL for specific changes
+                 const changeQuery = `
+                    PREFIX sio: <http://semanticscience.org/resource/>
+                    PREFIX ex: <https://rub-al-khali.bio2vec.net/consensus/>
+                    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+                    SELECT ?obs ?oldTaxon ?newTaxon ?changeType
+                    WHERE {
+                        ?newId sio:is-successor-of ?oldId ;
+                               sio:has-agent <${agentIri}> ;
+                               sio:has-target ?obsInd ;
+                               sio:has-output ?newTaxon .
+                        ?oldId sio:has-output ?oldTaxon .
+                        
+                        ${filterUri ? `?newTaxon rdfs:subClassOf* <${filterUri}> .` : ''}
+                        
+                        BIND(STRAFTER(STR(?obsInd), "obs_") AS ?obs)
+
+                        BIND(
+                          IF(EXISTS { ?newTaxon rdfs:subClassOf+ ?oldTaxon }, "Refinement",
+                          IF(EXISTS { ?oldTaxon rdfs:subClassOf+ ?newTaxon }, "Coarsening",
+                          IF(EXISTS { ?newTaxon ex:isIncompatibleWith ?oldTaxon }, "Flip", "Other")))
+                        AS ?changeType)
+                    }
+                    LIMIT 100
+                 `;
+                 const sparqlLink = createSparqlLink("View Changes", changeQuery);
+
+                 html += `<tr>
+                    <td><a href="https://www.inaturalist.org/people/${name}" target="_blank"><strong>${name}</strong></a></td>
+                    <td>${row.total.value}</td>
+                    <td>${row.refinements.value}</td>
+                    <td>${row.coarsenings.value}</td>
+                    <td>${row.flips.value}</td>
+                    <td>${sparqlLink}</td>
+                 </tr>`;
+             });
+             html += '</tbody></table>';
+             container.innerHTML = html;
         }
 
         async function loadExperts() {
              const container = document.getElementById('top-experts-list');
+             const filterUri = document.getElementById('community-filter').value;
+             let filterClause = "";
+             if (filterUri) {
+                 filterClause = `
+                    ?act sio:has-output ?taxon .
+                    ?taxon rdfs:subClassOf* <${filterUri}> .
+                 `;
+             }
+
              const query = `
-                SELECT ?agent (COUNT(?act) as ?count)
+                SELECT ?agent ?label (COUNT(?act) as ?count)
                 WHERE {
                     ?act a ex:ActiveIdentification ;
                          sio:has-agent ?agent .
+                    ${filterClause}
+                    OPTIONAL { ?agent rdfs:label ?label }
                 }
-                GROUP BY ?agent
+                GROUP BY ?agent ?label
                 ORDER BY DESC(?count)
                 LIMIT 10
              `;
              const data = await fetchSPARQL(query);
+             container.innerHTML = '';
              if (!data.results) return;
              
              let html = '<ol>';
              data.results.bindings.forEach(row => {
-                 const agent = row.agent.value.replace(PREFIXES.match(/ex: <(.*)>/)[1], '');
-                 html += `<li>${agent} (${row.count.value} ids)</li>`;
+                 const agentIri = row.agent.value;
+                 const name = row.label ? row.label.value : agentIri.split('_').pop();
+                 const count = row.count.value;
+                 
+                 // SPARQL for this user
+                 const userQuery = `SELECT ?act ?target WHERE { ?act sio:has-agent <${agentIri}> ; sio:has-target ?target . ${filterUri ? `?act sio:has-output ?t . ?t rdfs:subClassOf* <${filterUri}> .` : ''} } LIMIT 100`;
+                 const sparqlLink = createSparqlLink("View IDs", userQuery);
+                 
+                 html += `<li>
+                    <a href="https://www.inaturalist.org/people/${name}" target="_blank"><strong>${name}</strong></a> 
+                    (${count} ids) - ${sparqlLink}
+                 </li>`;
              });
              html += '</ol>';
              container.innerHTML = html;
@@ -596,25 +853,57 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
         
         async function loadDisagreement() {
              const container = document.getElementById('disagreement-list');
+             const filterUri = document.getElementById('community-filter').value;
+             let filterClause = "";
+             if (filterUri) {
+                 // Disagreement implies output of act is relevant? 
+                 // Or the conflicting observation involves taxa in this kingdom?
+                 // Let's filter by the agent's identification taxon
+                 filterClause = `
+                    ?act sio:has-output ?taxon .
+                    ?taxon rdfs:subClassOf* <${filterUri}> .
+                 `;
+             }
+             
              // Find agents who have identifications on conflicting observations
              const query = `
-                SELECT ?agent (COUNT(DISTINCT ?obs) as ?conflicts)
+                SELECT ?agent ?label (COUNT(DISTINCT ?obs) as ?conflicts)
                 WHERE {
                     ?obs a ex:ConflictingObservation .
                     ?act sio:has-target ?obs ;
                          sio:has-agent ?agent .
+                    ${filterClause}
+                    OPTIONAL { ?agent rdfs:label ?label }
                 }
-                GROUP BY ?agent
+                GROUP BY ?agent ?label
                 ORDER BY DESC(?conflicts)
                 LIMIT 10
              `;
              const data = await fetchSPARQL(query);
+             container.innerHTML = '';
              if (!data.results) return;
              
              let html = '<ul>';
              data.results.bindings.forEach(row => {
-                  const agent = row.agent.value.replace(PREFIXES.match(/ex: <(.*)>/)[1], '');
-                  html += `<li>${agent}: involved in ${row.conflicts.value} conflicts</li>`;
+                  const agentIri = row.agent.value;
+                  const name = row.label ? row.label.value : agentIri.split('_').pop();
+                  const count = row.conflicts.value;
+                  
+                  // SPARQL for conflicts
+                  const userConfQuery = `
+                    SELECT ?obs ?act 
+                    WHERE { 
+                        ?obs a ex:ConflictingObservation .
+                        ?act sio:has-target ?obs ;
+                             sio:has-agent <${agentIri}> .
+                        ${filterUri ? `?act sio:has-output ?t . ?t rdfs:subClassOf* <${filterUri}> .` : ''}
+                    }`;
+                  const sparqlLink = createSparqlLink("View Conflicts", userConfQuery);
+
+                  html += `<li>
+                    <a href="https://www.inaturalist.org/people/${name}" target="_blank"><strong>${name}</strong></a>: 
+                    ${count} conflicts - ${sparqlLink}
+                  </li>`;
              });
              html += '</ul>';
              container.innerHTML = html;

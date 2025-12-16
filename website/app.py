@@ -60,38 +60,38 @@ def run_pipeline(slug):
         owl_file = f"{slug}.owl"
         graph_uri = get_graph_uri(slug)
         
-        # We use docker-compose exec to run ISQL commands inside the container
-        # Note: Ideally we use a python ODBC driver, but calling docker CLI is robust for this setup.
-        
-        # Clear graph first (if exists)
-        clear_cmd = f"SPARQL CLEAR GRAPH <{graph_uri}>;"
-        load_cmd_1 = f"ld_dir('/data/projects_data', '{owl_file}', '{graph_uri}');"
-        load_cmd_2 = "rdf_loader_run();"
-        load_cmd_3 = "checkpoint;"
-        
-        def run_isql(sql):
-            full_cmd = [
-                "docker-compose", 
-                "exec", "-T", "virtuoso", 
-                "isql-v", "1111", "dba", "dba", 
-                f"exec={sql}"
-            ]
-            subprocess.run(full_cmd, cwd=PROJECT_ROOT, check=True)
+        # Create SQL script in project folder (mounted as /data)
+        sql_file_path = os.path.join(PROJECT_ROOT, 'project', 'load.sql')
+        try:
+            with open(sql_file_path, 'w') as f:
+                f.write(f"SPARQL CLEAR GRAPH <{graph_uri}>;\n")
+                f.write(f"DELETE FROM DB.DBA.LOAD_LIST WHERE ll_file LIKE '%{owl_file}';\n")
+                f.write(f"ld_dir('/data/projects_data', '{owl_file}', '{graph_uri}');\n")
+                f.write("rdf_loader_run();\n")
+                f.write("checkpoint;\n")
+                f.write("EXIT;\n")
+        except Exception as e:
+            print(f"[{slug}] Error writing SQL script: {e}")
+            project_status[slug] = {"status": "error", "msg": "Internal Error (SQL generation)"}
+            return
 
-        print(f"[{slug}] Clearing old graph...")
-        run_isql(clear_cmd)
+        print(f"[{slug}] Running ISQL batch script...")
+        full_cmd = [
+            "docker-compose", 
+            "exec", "-T", "virtuoso", 
+            "isql-v", "1111", "dba", "dba", 
+            "/data/load.sql"
+        ]
         
-        print(f"[{slug}] Queueing load...")
-        run_isql(load_cmd_1)
-        
-        print(f"[{slug}] Running loader...")
-        run_isql(load_cmd_2)
-        run_isql(load_cmd_3)
-        
-        print(f"[{slug}] Ready.")
-        project_status[slug] = {"status": "ready", "msg": "Project loaded successfully."}
-        if slug not in active_projects:
-            active_projects.append(slug)
+        try:
+            subprocess.run(full_cmd, cwd=PROJECT_ROOT, check=True)
+            print(f"[{slug}] Ready.")
+            project_status[slug] = {"status": "ready", "msg": "Project loaded successfully."}
+            if slug not in active_projects:
+                active_projects.append(slug)
+        except subprocess.CalledProcessError as e:
+             print(f"[{slug}] ISQL Error: {e}")
+             project_status[slug] = {"status": "error", "msg": "Knowledge Graph Load Failed."}
 
     except Exception as e:
         print(f"[{slug}] Error: {e}")
