@@ -8,8 +8,24 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 1rem; }
-        .tab-btn { padding: 10px 20px; border: none; background: none; cursor: pointer; font-size: 1.1rem; border-bottom: 3px solid transparent; }
-        .tab-btn.active { border-bottom-color: #2e7d32; color: #2e7d32; font-weight: bold; }
+        .tab-btn { 
+            padding: 10px 20px; 
+            border: none; 
+            background: transparent; 
+            cursor: pointer; 
+            font-size: 1.1rem; 
+            border-bottom: 3px solid transparent; 
+            color: #555; /* Dark text for visibility */
+        }
+        .tab-btn:hover {
+            background-color: #e9ecef;
+            color: #333;
+        }
+        .tab-btn.active { 
+            border-bottom-color: #2e7d32; 
+            color: #2e7d32; 
+            font-weight: bold; 
+        }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         /* Table Styles for new tabs */
