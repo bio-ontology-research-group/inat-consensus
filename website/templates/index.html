@@ -16,6 +16,10 @@
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
+        
+        .query-card { background: #f4f4f4; padding: 1rem; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 2rem; }
+        .sparql-code { margin: 0; white-space: pre-wrap; font-family: monospace; background: #fff; padding: 1rem; border: 1px solid #eee; }
+        .query-link { margin-top: 1rem; text-align: right; }
     </style>
 </head>
 <body>
@@ -37,6 +41,7 @@
         <nav class="tabs">
             <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
             <button class="tab-btn" onclick="switchTab('genomics')">Genomics</button>
+            <button class="tab-btn" onclick="switchTab('federation')">Federation</button>
             <button class="tab-btn" onclick="switchTab('community')">Community</button>
         </nav>
 
@@ -94,14 +99,17 @@ LIMIT 5
             <h2>Genomic Interoperability</h2>
             <p>Taxa in this project linked to external biological databases via NCBI IDs.</p>
             <div id="genomics-list">Loading...</div>
-            
-            <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #eee;">
-            
-            <h3>Federated Query Example: Proteins by Function</h3>
-            <p>This query demonstrates how to select a taxon from the local Knowledge Graph (e.g., mapped to NCBI) and dynamically query the remote <strong>UniProt</strong> SPARQL endpoint to find proteins with a specific function.</p>
-            
-            <div style="background: #f4f4f4; padding: 1rem; border-radius: 4px; border: 1px solid #ddd;">
-                <pre id="fed-query-code" style="margin: 0; white-space: pre-wrap; font-family: monospace;">
+        </div>
+
+        <!-- FEDERATION TAB -->
+        <div id="tab-federation" class="tab-content">
+            <h2>UniProt Federation Samples</h2>
+            <p>These queries demonstrate how to link local taxa to the remote <strong>UniProt</strong> SPARQL endpoint.</p>
+
+            <div class="query-card">
+                <h3>1. Proteins by Function</h3>
+                <p>Find proteins for local taxa that have a specific functional annotation.</p>
+                <pre id="fed-query-1" class="sparql-code">
 PREFIX up: <http://purl.uniprot.org/core/>
 PREFIX sio: <http://semanticscience.org/resource/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -109,12 +117,10 @@ PREFIX ex: <https://rub-al-khali.bio2vec.net/consensus/>
 
 SELECT ?taxon ?protein ?name ?function
 WHERE {
-  # 1. Local: Find a taxon with an NCBI ID
   ?taxon rdfs:subClassOf+ sio:Taxon .
   FILTER(REGEX(STR(?taxon), "NCBITaxon_"))
   BIND(STRAFTER(STR(?taxon), "NCBITaxon_") AS ?ncbi_id)
 
-  # 2. Remote: Ask UniProt for proteins of this taxon
   SERVICE <https://sparql.uniprot.org/sparql> {
     BIND(IRI(CONCAT("http://purl.uniprot.org/taxonomy/", ?ncbi_id)) AS ?up_taxon)
     ?protein up:organism ?up_taxon ;
@@ -126,9 +132,62 @@ WHERE {
 }
 LIMIT 5
                 </pre>
-                <div style="margin-top: 1rem; text-align: right;">
-                    <span id="fed-query-link"></span>
-                </div>
+                <div id="fed-link-1" class="query-link"></div>
+            </div>
+
+            <div class="query-card">
+                <h3>2. Genes encoded by Genome</h3>
+                <p>Find genes associated with taxa in this project.</p>
+                <pre id="fed-query-2" class="sparql-code">
+PREFIX up: <http://purl.uniprot.org/core/>
+PREFIX sio: <http://semanticscience.org/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?taxon ?gene ?geneName
+WHERE {
+  ?taxon rdfs:subClassOf+ sio:Taxon .
+  FILTER(REGEX(STR(?taxon), "NCBITaxon_"))
+  BIND(STRAFTER(STR(?taxon), "NCBITaxon_") AS ?ncbi_id)
+
+  SERVICE <https://sparql.uniprot.org/sparql> {
+    BIND(IRI(CONCAT("http://purl.uniprot.org/taxonomy/", ?ncbi_id)) AS ?up_taxon)
+    ?protein up:organism ?up_taxon ;
+             up:encodedBy ?gene .
+    ?gene skos:prefLabel ?geneName .
+  }
+}
+LIMIT 5
+                </pre>
+                <div id="fed-link-2" class="query-link"></div>
+            </div>
+
+            <div class="query-card">
+                <h3>3. Protein Sequence Lengths</h3>
+                <p>Retrieve the length of protein sequences for organisms in this project.</p>
+                <pre id="fed-query-3" class="sparql-code">
+PREFIX up: <http://purl.uniprot.org/core/>
+PREFIX sio: <http://semanticscience.org/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?taxon ?protein ?length
+WHERE {
+  ?taxon rdfs:subClassOf+ sio:Taxon .
+  FILTER(REGEX(STR(?taxon), "NCBITaxon_"))
+  BIND(STRAFTER(STR(?taxon), "NCBITaxon_") AS ?ncbi_id)
+
+  SERVICE <https://sparql.uniprot.org/sparql> {
+    BIND(IRI(CONCAT("http://purl.uniprot.org/taxonomy/", ?ncbi_id)) AS ?up_taxon)
+    ?protein up:organism ?up_taxon ;
+             up:sequence ?seq .
+    ?seq rdf:value ?seqValue .
+    BIND(STRLEN(?seqValue) AS ?length)
+  }
+}
+LIMIT 5
+                </pre>
+                <div id="fed-link-3" class="query-link"></div>
             </div>
         </div>
 
@@ -440,6 +499,7 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
             // Load Data if needed
             if (tabId === 'genomics') loadGenomics();
             if (tabId === 'community') loadCommunity();
+            if (tabId === 'federation') loadFederation();
         }
 
         async function loadGenomics() {
@@ -477,10 +537,15 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
              });
              html += '</tbody></table>';
              container.innerHTML = html;
+        }
+
+        function loadFederation() {
+             if (!currentProject) return;
              
-             // Update Federated Query Link
-             const fedQuery = document.getElementById('fed-query-code').textContent.trim();
-             document.getElementById('fed-query-link').innerHTML = createSparqlLink("Open in Virtuoso Editor", fedQuery);
+             ['1', '2', '3'].forEach(id => {
+                 const code = document.getElementById(`fed-query-${id}`).textContent.trim();
+                 document.getElementById(`fed-link-${id}`).innerHTML = createSparqlLink("Open in Virtuoso Editor", code);
+             });
         }
 
         async function loadCommunity() {
