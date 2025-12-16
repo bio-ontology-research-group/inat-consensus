@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 # Configuration
 SPARQL_ENDPOINT = "http://localhost:8890/sparql"
-BASE_GRAPH_URI = "http://example.org/biodiversity/"
+BASE_GRAPH_URI = "https://rub-al-khali.bio2vec.net/consensus/"
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 # In-memory state for job status
@@ -105,7 +105,7 @@ def init_existing_projects():
     query = """
     SELECT DISTINCT ?g WHERE {
       GRAPH ?g { ?s ?p ?o }
-      FILTER (STRSTARTS(STR(?g), "http://example.org/biodiversity/"))
+      FILTER (STRSTARTS(STR(?g), "https://rub-al-khali.bio2vec.net/consensus/"))
     }
     """
     try:

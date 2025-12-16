@@ -6,6 +6,17 @@
     <title>Biodiversity Consensus Dashboard</title>
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 1rem; }
+        .tab-btn { padding: 10px 20px; border: none; background: none; cursor: pointer; font-size: 1.1rem; border-bottom: 3px solid transparent; }
+        .tab-btn.active { border-bottom-color: #2e7d32; color: #2e7d32; font-weight: bold; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        /* Table Styles for new tabs */
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
 </head>
 <body>
     <header>
@@ -23,37 +34,45 @@
             <strong>Status:</strong> <span id="status-msg"></span>
         </div>
 
-        <section id="stats">
-            <h2>Live Statistics</h2>
-            <div class="stats-grid">
-                <div class="stat-card" id="stat-obs">
-                    <h3>Observations</h3>
-                    <p class="loading">-</p>
-                </div>
-                <div class="stat-card" id="stat-conflicts">
-                    <h3>Conflicts</h3>
-                    <p class="loading">-</p>
-                </div>
-                <div class="stat-card" id="stat-taxa">
-                    <h3>Active Taxa</h3>
-                    <p class="loading">-</p>
-                </div>
-            </div>
-        </section>
+        <nav class="tabs">
+            <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+            <button class="tab-btn" onclick="switchTab('genomics')">Genomics</button>
+            <button class="tab-btn" onclick="switchTab('community')">Community</button>
+        </nav>
 
-        <section id="conflicts-view">
-            <h2>Epistemic Conflicts</h2>
-            <p>Observations where active identifications disagree on incompatible taxa.</p>
-            <div id="conflicts-list" class="grid-list">
-                <!-- Conflicts injected here -->
-            </div>
-        </section>
-
-        <section id="sparql-playground">
-            <h2>SPARQL Playground</h2>
-            <p>Querying graph: <code id="current-graph-uri">ALL</code></p>
-            <textarea id="sparql-input">
-PREFIX ex: <http://example.org/biodiversity/>
+        <!-- OVERVIEW TAB -->
+        <div id="tab-overview" class="tab-content active">
+            <section id="stats">
+                <h2>Live Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-card" id="stat-obs">
+                        <h3>Observations</h3>
+                        <p class="loading">-</p>
+                    </div>
+                    <div class="stat-card" id="stat-conflicts">
+                        <h3>Conflicts</h3>
+                        <p class="loading">-</p>
+                    </div>
+                    <div class="stat-card" id="stat-taxa">
+                        <h3>Active Taxa</h3>
+                        <p class="loading">-</p>
+                    </div>
+                </div>
+            </section>
+    
+            <section id="conflicts-view">
+                <h2>Epistemic Conflicts</h2>
+                <p>Observations where active identifications disagree on incompatible taxa.</p>
+                <div id="conflicts-list" class="grid-list">
+                    <!-- Conflicts injected here -->
+                </div>
+            </section>
+    
+            <section id="sparql-playground">
+                <h2>SPARQL Playground</h2>
+                <p>Querying graph: <code id="current-graph-uri">ALL</code></p>
+                <textarea id="sparql-input">
+PREFIX ex: <https://rub-al-khali.bio2vec.net/consensus/>
 PREFIX sio: <http://semanticscience.org/resource/>
 
 SELECT ?taxon (COUNT(?act) AS ?count)
@@ -64,10 +83,69 @@ WHERE {
 GROUP BY ?taxon
 ORDER BY DESC(?count)
 LIMIT 5
-            </textarea>
-            <button onclick="runQuery()">Run Query</button>
-            <div id="sparql-result"></div>
-        </section>
+                </textarea>
+                <button onclick="runQuery()">Run Query</button>
+                <div id="sparql-result"></div>
+            </section>
+        </div>
+
+        <!-- GENOMICS TAB -->
+        <div id="tab-genomics" class="tab-content">
+            <h2>Genomic Interoperability</h2>
+            <p>Taxa in this project linked to external biological databases via NCBI IDs.</p>
+            <div id="genomics-list">Loading...</div>
+            
+            <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #eee;">
+            
+            <h3>Federated Query Example: Proteins by Function</h3>
+            <p>This query demonstrates how to select a taxon from the local Knowledge Graph (e.g., mapped to NCBI) and dynamically query the remote <strong>UniProt</strong> SPARQL endpoint to find proteins with a specific function.</p>
+            
+            <div style="background: #f4f4f4; padding: 1rem; border-radius: 4px; border: 1px solid #ddd;">
+                <pre id="fed-query-code" style="margin: 0; white-space: pre-wrap; font-family: monospace;">
+PREFIX up: <http://purl.uniprot.org/core/>
+PREFIX sio: <http://semanticscience.org/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX ex: <https://rub-al-khali.bio2vec.net/consensus/>
+
+SELECT ?taxon ?protein ?name ?function
+WHERE {
+  # 1. Local: Find a taxon with an NCBI ID
+  ?taxon rdfs:subClassOf+ sio:Taxon .
+  FILTER(REGEX(STR(?taxon), "NCBITaxon_"))
+  BIND(STRAFTER(STR(?taxon), "NCBITaxon_") AS ?ncbi_id)
+
+  # 2. Remote: Ask UniProt for proteins of this taxon
+  SERVICE <https://sparql.uniprot.org/sparql> {
+    BIND(IRI(CONCAT("http://purl.uniprot.org/taxonomy/", ?ncbi_id)) AS ?up_taxon)
+    ?protein up:organism ?up_taxon ;
+             up:recommendedName/up:fullName ?name ;
+             up:annotation ?anno .
+    ?anno a up:Function_Annotation ;
+          rdfs:comment ?function .
+  }
+}
+LIMIT 5
+                </pre>
+                <div style="margin-top: 1rem; text-align: right;">
+                    <span id="fed-query-link"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMMUNITY TAB -->
+        <div id="tab-community" class="tab-content">
+            <h2>Community Analysis</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Top Experts</h3>
+                    <div id="top-experts-list">Loading...</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Disagreement Rates</h3>
+                    <div id="disagreement-list">Loading...</div>
+                </div>
+            </div>
+        </div>
     </main>
     
     <!-- Add Project Modal -->
@@ -84,7 +162,7 @@ LIMIT 5
     <script>
         const PREFIXES = `
 PREFIX sio: <http://semanticscience.org/resource/>
-PREFIX ex: <http://example.org/biodiversity/>
+PREFIX ex: <https://rub-al-khali.bio2vec.net/consensus/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
@@ -92,6 +170,11 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
         let currentProject = null;
         let activeProjects = [];
         let statuses = {};
+        
+        // Pagination State
+        let currentConflictPage = 0;
+        const itemsPerPage = 6;
+        let totalConflicts = 0;
 
         // Polling
         setInterval(refreshProjects, 5000);
@@ -143,7 +226,7 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
 
         async function switchProject(slug) {
             currentProject = slug;
-            document.getElementById('current-graph-uri').textContent = `http://example.org/biodiversity/${slug}`;
+            document.getElementById('current-graph-uri').textContent = `https://rub-al-khali.bio2vec.net/consensus/${slug}`;
             
             // Clear current view
             document.querySelector('#stat-obs p').textContent = 'Loading...';
@@ -151,7 +234,10 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
             document.querySelector('#stat-taxa p').textContent = 'Loading...';
             document.getElementById('conflicts-list').innerHTML = '';
             
-            loadStats();
+            // Reset pagination
+            currentConflictPage = 0;
+
+            await loadStats();
             loadConflicts();
         }
 
@@ -166,6 +252,19 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
             });
             return await response.json();
         }
+        
+        function createSparqlLink(val, query) {
+             if (!currentProject) return val;
+             const graphUri = `https://rub-al-khali.bio2vec.net/consensus/${currentProject}`;
+             const fullQuery = PREFIXES + query;
+             const params = new URLSearchParams();
+             params.append("default-graph-uri", graphUri);
+             params.append("qtxt", fullQuery);
+             // Removing format param to ensure it loads the UI
+             
+             const url = `http://localhost:8890/sparql?${params.toString()}`;
+             return `<a href="${url}" target="_blank" title="Run query in Virtuoso">${val} <small>&#8599;</small></a>`;
+        }
 
         async function loadStats() {
             if (!currentProject) return;
@@ -173,65 +272,126 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
             // Count Obs
             const qObs = `SELECT (COUNT(?s) AS ?count) WHERE { ?s a sio:Observation }`;
             const rObs = await fetchSPARQL(qObs);
-            if(rObs.results) document.querySelector('#stat-obs p').textContent = rObs.results.bindings[0].count.value;
+            if(rObs.results) {
+                 const val = rObs.results.bindings[0].count.value;
+                 document.querySelector('#stat-obs p').innerHTML = createSparqlLink(val, qObs);
+            }
 
             // Count Conflicts
             const qConf = `SELECT (COUNT(?s) AS ?count) WHERE { ?s a ex:ConflictingObservation }`;
             const rConf = await fetchSPARQL(qConf);
-            if(rConf.results) document.querySelector('#stat-conflicts p').textContent = rConf.results.bindings[0].count.value;
+            if(rConf.results) {
+                const val = rConf.results.bindings[0].count.value;
+                totalConflicts = parseInt(val);
+                document.querySelector('#stat-conflicts p').innerHTML = createSparqlLink(val, qConf);
+            }
             
             // Count Taxa
             const qTaxa = `SELECT (COUNT(DISTINCT ?t) AS ?count) WHERE { ?s a ex:ActiveIdentification ; sio:has-output ?t }`;
             const rTaxa = await fetchSPARQL(qTaxa);
-            if(rTaxa.results) document.querySelector('#stat-taxa p').textContent = rTaxa.results.bindings[0].count.value;
+            if(rTaxa.results) {
+                 const val = rTaxa.results.bindings[0].count.value;
+                 document.querySelector('#stat-taxa p').innerHTML = createSparqlLink(val, qTaxa);
+            }
         }
 
         async function loadConflicts() {
             if (!currentProject) return;
+            
+            const offset = currentConflictPage * itemsPerPage;
+            
             const query = `
                 SELECT ?obs ?obsInd
                 WHERE {
                     ?obsInd a ex:ConflictingObservation .
                     BIND(STRAFTER(STR(?obsInd), "obs_") AS ?obs)
                 }
-                LIMIT 6
+                ORDER BY ?obs
+                LIMIT ${itemsPerPage}
+                OFFSET ${offset}
             `;
             const data = await fetchSPARQL(query);
             const container = document.getElementById('conflicts-list');
             container.innerHTML = '';
             
             if (!data.results || !data.results.bindings || data.results.bindings.length === 0) {
-                container.innerHTML = '<p>No conflicts detected in this dataset.</p>';
-                return;
+                if (currentConflictPage === 0) {
+                     container.innerHTML = '<p>No conflicts detected in this dataset.</p>';
+                } else {
+                     container.innerHTML = '<p>No more conflicts.</p>';
+                }
+            } else {
+                for (const row of data.results.bindings) {
+                    const obsId = row.obs.value;
+                    const card = document.createElement('div');
+                    card.className = 'obs-card';
+                    card.innerHTML = `<h3>Observation ${obsId}</h3><p>Loading metadata...</p>`;
+                    container.appendChild(card);
+                    
+                    // Fetch iNaturalist Metadata for Image
+                    fetch(`https://api.inaturalist.org/v1/observations/${obsId}`)
+                        .then(r => r.json())
+                        .then(inat => {
+                            if(inat.results && inat.results.length > 0) {
+                                const o = inat.results[0];
+                                const imgUrl = o.photos.length > 0 ? o.photos[0].url.replace('square', 'medium') : '';
+                                card.innerHTML = `
+                                    <img src="${imgUrl}" alt="Observation Photo">
+                                    <div class="card-content">
+                                        <h3><a href="https://www.inaturalist.org/observations/${obsId}" target="_blank">Observation ${obsId}</a></h3>
+                                        <p><strong>User:</strong> ${o.user.login}</p>
+                                        <p><strong>Taxon:</strong> ${o.taxon ? o.taxon.name : 'Unknown'}</p>
+                                        <span class="badge conflict">CONFLICT DETECTED</span>
+                                    </div>
+                                `;
+                            }
+                        });
+                }
             }
-
-            for (const row of data.results.bindings) {
-                const obsId = row.obs.value;
-                const card = document.createElement('div');
-                card.className = 'obs-card';
-                card.innerHTML = `<h3>Observation ${obsId}</h3><p>Loading metadata...</p>`;
-                container.appendChild(card);
-                
-                // Fetch iNaturalist Metadata for Image
-                fetch(`https://api.inaturalist.org/v1/observations/${obsId}`)
-                    .then(r => r.json())
-                    .then(inat => {
-                        if(inat.results && inat.results.length > 0) {
-                            const o = inat.results[0];
-                            const imgUrl = o.photos.length > 0 ? o.photos[0].url.replace('square', 'medium') : '';
-                            card.innerHTML = `
-                                <img src="${imgUrl}" alt="Observation Photo">
-                                <div class="card-content">
-                                    <h3><a href="https://www.inaturalist.org/observations/${obsId}" target="_blank">Observation ${obsId}</a></h3>
-                                    <p><strong>User:</strong> ${o.user.login}</p>
-                                    <p><strong>Taxon:</strong> ${o.taxon ? o.taxon.name : 'Unknown'}</p>
-                                    <span class="badge conflict">CONFLICT DETECTED</span>
-                                </div>
-                            `;
-                        }
-                    });
-            }
+            
+            // Pagination Controls
+            renderPaginationControls(container);
         }
+        
+        function renderPaginationControls(container) {
+             const controls = document.createElement('div');
+             controls.className = 'pagination-controls';
+             controls.style.gridColumn = "1 / -1";
+             controls.style.textAlign = "center";
+             controls.style.marginTop = "1rem";
+             
+             const btnPrev = document.createElement('button');
+             btnPrev.textContent = "Previous";
+             btnPrev.disabled = currentConflictPage === 0;
+             btnPrev.onclick = () => {
+                 if (currentConflictPage > 0) {
+                     currentConflictPage--;
+                     loadConflicts();
+                 }
+             };
+             
+             const btnNext = document.createElement('button');
+             btnNext.textContent = "Next";
+             // Disable if we reached end
+             // (current + 1) * limit >= total
+             btnNext.disabled = ((currentConflictPage + 1) * itemsPerPage) >= totalConflicts;
+             btnNext.onclick = () => {
+                 currentConflictPage++;
+                 loadConflicts();
+             };
+             
+             const info = document.createElement('span');
+             info.style.margin = "0 1rem";
+             const start = currentConflictPage * itemsPerPage + 1;
+             const end = Math.min((currentConflictPage + 1) * itemsPerPage, totalConflicts);
+             info.textContent = totalConflicts > 0 ? `Showing ${start}-${end} of ${totalConflicts}` : '0 of 0';
+             
+             controls.appendChild(btnPrev);
+             controls.appendChild(info);
+             controls.appendChild(btnNext);
+             container.appendChild(controls);
+        }
+
 
         async function runQuery() {
             const q = document.getElementById('sparql-input').value;
@@ -264,6 +424,119 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
             } catch (e) {
                 resDiv.textContent = "Error: " + e;
             }
+        }
+
+        // Tab Logic
+        function switchTab(tabId) {
+            // Update UI
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Activate target
+            const btn = document.querySelector(`button[onclick="switchTab('${tabId}')"]`);
+            if(btn) btn.classList.add('active');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            
+            // Load Data if needed
+            if (tabId === 'genomics') loadGenomics();
+            if (tabId === 'community') loadCommunity();
+        }
+
+        async function loadGenomics() {
+             if (!currentProject) return;
+             const container = document.getElementById('genomics-list');
+             container.innerHTML = 'Loading linked data...';
+             
+             const query = `
+                SELECT DISTINCT ?taxon ?label
+                WHERE {
+                    ?taxon rdfs:subClassOf+ sio:Taxon .
+                    FILTER(REGEX(STR(?taxon), "NCBITaxon"))
+                    OPTIONAL { ?taxon rdfs:label ?label }
+                }
+                LIMIT 50
+             `;
+             
+             const data = await fetchSPARQL(query);
+             if (!data.results || data.results.bindings.length === 0) {
+                 container.innerHTML = '<p>No NCBI mappings found.</p>';
+                 return;
+             }
+             
+             let html = '<table><thead><tr><th>Taxon IRI</th><th>External Links</th></tr></thead><tbody>';
+             data.results.bindings.forEach(row => {
+                 const iri = row.taxon.value;
+                 const id = iri.split('_')[1];
+                 html += `<tr>
+                    <td>${iri}</td>
+                    <td>
+                        <a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=${id}" target="_blank">NCBI Taxonomy</a> | 
+                        <a href="https://www.uniprot.org/uniprotkb?query=taxonomy_id:${id}" target="_blank">UniProt</a>
+                    </td>
+                 </tr>`;
+             });
+             html += '</tbody></table>';
+             container.innerHTML = html;
+             
+             // Update Federated Query Link
+             const fedQuery = document.getElementById('fed-query-code').textContent.trim();
+             document.getElementById('fed-query-link').innerHTML = createSparqlLink("Open in Virtuoso Editor", fedQuery);
+        }
+
+        async function loadCommunity() {
+            if (!currentProject) return;
+            loadExperts();
+            loadDisagreement();
+        }
+
+        async function loadExperts() {
+             const container = document.getElementById('top-experts-list');
+             const query = `
+                SELECT ?agent (COUNT(?act) as ?count)
+                WHERE {
+                    ?act a ex:ActiveIdentification ;
+                         sio:has-agent ?agent .
+                }
+                GROUP BY ?agent
+                ORDER BY DESC(?count)
+                LIMIT 10
+             `;
+             const data = await fetchSPARQL(query);
+             if (!data.results) return;
+             
+             let html = '<ol>';
+             data.results.bindings.forEach(row => {
+                 const agent = row.agent.value.replace(PREFIXES.match(/ex: <(.*)>/)[1], '');
+                 html += `<li>${agent} (${row.count.value} ids)</li>`;
+             });
+             html += '</ol>';
+             container.innerHTML = html;
+        }
+        
+        async function loadDisagreement() {
+             const container = document.getElementById('disagreement-list');
+             // Find agents who have identifications on conflicting observations
+             const query = `
+                SELECT ?agent (COUNT(DISTINCT ?obs) as ?conflicts)
+                WHERE {
+                    ?obs a ex:ConflictingObservation .
+                    ?act sio:has-target ?obs ;
+                         sio:has-agent ?agent .
+                }
+                GROUP BY ?agent
+                ORDER BY DESC(?conflicts)
+                LIMIT 10
+             `;
+             const data = await fetchSPARQL(query);
+             if (!data.results) return;
+             
+             let html = '<ul>';
+             data.results.bindings.forEach(row => {
+                  const agent = row.agent.value.replace(PREFIXES.match(/ex: <(.*)>/)[1], '');
+                  html += `<li>${agent}: involved in ${row.conflicts.value} conflicts</li>`;
+             });
+             html += '</ul>';
+             container.innerHTML = html;
         }
 
         // Modal Logic

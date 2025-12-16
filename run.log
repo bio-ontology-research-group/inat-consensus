@@ -1,0 +1,619 @@
+==========================================
+RUNNING BIODIVERSITY CONSENSUS PIPELINE
+Initializing Default Project: rub-al-khali
+==========================================
+[1/4] Starting Virtuoso...
+ Container inaturalist-rub-al-khali-virtuoso-1  Stopping
+ Container inaturalist-rub-al-khali-virtuoso-1  Stopped
+ Container inaturalist-rub-al-khali-virtuoso-1  Removing
+ Container inaturalist-rub-al-khali-virtuoso-1  Removed
+ Network inaturalist-rub-al-khali_default  Removing
+ Network inaturalist-rub-al-khali_default  Removed
+ Network inaturalist-rub-al-khali_default  Creating
+ Network inaturalist-rub-al-khali_default  Created
+ Container inaturalist-rub-al-khali-virtuoso-1  Creating
+ Container inaturalist-rub-al-khali-virtuoso-1  Created
+ Container inaturalist-rub-al-khali-virtuoso-1  Starting
+ Container inaturalist-rub-al-khali-virtuoso-1  Started
+Waiting for Virtuoso...
+.
+[2/4] Building Ontology...
+> Task :compileJava NO-SOURCE
+> Task :compileGroovy UP-TO-DATE
+> Task :processResources NO-SOURCE
+> Task :classes UP-TO-DATE
+
+> Task :run
+Starting Biodiversity Consensus Project for: rub-al-khali
+Fetching page 1...
+Fetching page 2...
+Fetching page 3...
+Fetched 227 observations.
+Processing taxonomy...
+Found 269 unique taxa in dataset.
+Parsing ncbitaxon.obo...
+Mapping complete. Mapped: 80, Unmapped: 14
+Added 33894 incompatible pairs.
+Ontology saved to /home/leechuck/Documents/papers/iNaturalist-rub-al-khali/project/projects_data/rub-al-khali.owl
+Running HermiT...
+Consistent? true
+Conflicts: 10
+Total Obs: 227
+Mapped: 80, Unmapped: 14
+
+BUILD SUCCESSFUL in 26s
+2 actionable tasks: 1 executed, 1 up-to-date
+[3/4] Loading Data into SPARQL Endpoint...
+OpenLink Virtuoso Interactive SQL (Virtuoso)
+Version 07.20.3233 as of Jun 30 2021
+Type HELP; for help and EXIT; to exit.
+Connected to OpenLink Virtuoso
+Driver: 07.20.3233 OpenLink Virtuoso ODBC Driver
+
+Done. -- 1 msec.
+OpenLink Virtuoso Interactive SQL (Virtuoso)
+Version 07.20.3233 as of Jun 30 2021
+Type HELP; for help and EXIT; to exit.
+Connected to OpenLink Virtuoso
+Driver: 07.20.3233 OpenLink Virtuoso ODBC Driver
+
+Done. -- 2 msec.
+OpenLink Virtuoso Interactive SQL (Virtuoso)
+Version 07.20.3233 as of Jun 30 2021
+Type HELP; for help and EXIT; to exit.
+Connected to OpenLink Virtuoso
+Driver: 07.20.3233 OpenLink Virtuoso ODBC Driver
+
+Done. -- 32 msec.
+[4/4] Done!
+SPARQL Endpoint: http://localhost:8890/sparql
+Starting Website at http://localhost:5000 ...
+Press Ctrl+C to stop.
+warning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead
+Using CPython 3.13.5
+Creating virtual environment at: .venv
+Installed 12 packages in 26ms
+Checking for existing projects in Knowledge Graph...
+ * Serving Flask app 'app'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.154:5000
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 100-988-835
+127.0.0.1 - - [16/Dec/2025 14:35:01] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:01] "GET /static/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:02] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:02] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+127.0.0.1 - - [16/Dec/2025 14:35:02] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:02] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:02] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:02] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:07] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:12] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:17] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:18] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:19] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 14:35:19] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:19] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:19] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:19] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:19] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:24] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:29] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:34] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:39] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:44] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:49] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:54] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:35:59] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:04] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:09] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:14] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:19] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:24] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:29] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:34] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:39] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:44] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:46] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:46] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 14:36:46] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:46] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:46] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:46] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:46] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:51] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:36:56] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:01] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:06] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:11] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:16] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:21] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:26] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:31] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:36] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:42] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:42] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 14:37:42] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:42] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:42] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:42] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:42] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:47] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:52] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:37:57] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:38:02] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:38:07] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:38:12] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:38:17] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:38:22] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:38:27] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:38:32] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:38:37] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:38:42] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:38:47] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:38:52] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:38:57] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:02] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:07] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:12] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:17] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:22] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:27] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:29] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:29] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 14:39:29] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:29] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:29] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:29] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:29] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:34] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:39] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:44] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:49] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:54] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:39:59] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:40:04] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:40:09] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:40:14] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:40:19] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:40:24] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:40:29] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:40:34] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:40:39] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:40:44] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:40:49] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:40:54] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:40:59] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:41:04] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:41:09] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:41:14] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:41:19] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:41:24] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:41:29] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:41:34] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:41:39] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:41:44] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:41:49] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:41:54] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:41:59] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:42:04] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:42:09] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:42:14] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:42:19] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:42:24] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:42:29] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:42:34] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:42:39] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:42:44] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:42:49] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:42:54] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:42:59] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:43:04] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:43:09] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:43:14] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:43:19] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:43:24] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:43:29] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:43:34] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:43:39] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:43:44] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:43:49] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:43:54] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:43:59] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:44:04] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:44:09] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:44:14] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:44:19] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:44:24] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:44:29] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:44:34] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:44:39] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:44:44] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:44:49] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:44:54] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:44:59] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:45:04] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:45:09] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:45:14] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:45:19] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:45:24] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:45:29] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:45:34] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:45:40] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:45:45] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:45:50] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:45:55] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:46:00] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:46:05] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:46:10] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:46:15] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:46:20] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:46:25] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:46:30] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:46:35] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:46:40] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:46:45] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:46:50] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:46:55] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:47:00] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:47:05] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:47:10] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:47:15] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:47:20] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:47:25] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:47:30] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:47:35] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:47:40] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:47:45] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:47:50] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:47:55] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:48:00] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:48:05] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:48:10] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:48:15] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:48:20] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:48:25] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:48:31] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:48:36] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:48:41] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:48:46] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:48:51] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:48:56] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:49:01] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:49:06] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:49:11] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:49:16] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:49:21] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:49:26] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:49:31] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:49:36] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:49:41] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:49:46] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:49:51] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:49:56] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:01] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:06] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:11] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:16] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:21] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:26] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:31] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:36] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:39] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:39] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 14:50:39] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:39] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:39] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:39] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:39] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:41] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:44] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:46] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:49] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:50] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:50] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 14:50:51] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:51] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:51] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:51] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:51] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:51] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:56] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:50:56] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:00] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:00] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 14:51:00] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:01] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:01] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:01] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:01] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:01] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:05] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:06] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:10] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:11] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:11] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:11] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 14:51:11] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:11] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:11] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:11] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:11] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:16] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:16] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:21] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:21] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:26] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:26] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:31] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:31] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 14:51:31] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:31] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:31] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:31] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:31] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:31] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:36] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:36] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:41] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:41] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:46] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:46] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:51] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:51] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:56] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:51:57] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:01] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:02] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:06] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:07] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:11] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:12] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:16] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:17] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:21] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:22] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:26] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:27] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:31] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:32] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:36] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:37] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:41] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:42] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:46] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:47] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:51] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:52] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:56] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:52:57] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:01] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:02] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:06] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:07] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:11] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:12] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:16] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:17] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:21] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:22] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:26] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:27] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:31] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:32] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:36] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:37] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:41] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:42] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:46] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:47] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:51] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:52] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:56] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:53:57] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:01] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:02] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:06] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:07] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:11] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:12] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:16] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:17] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:21] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:22] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:26] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:27] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:28] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:28] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 14:54:28] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:28] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:28] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:28] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:28] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:31] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:33] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:36] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:38] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:41] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:44] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:46] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:49] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:51] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:54] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:56] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:54:59] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:01] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:04] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:06] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:09] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:11] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:14] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:16] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:19] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:21] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:24] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:26] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:29] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:31] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:31] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:34] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:36] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:39] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:41] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:44] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:46] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:49] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:52] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:54] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:57] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:55:59] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:02] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:04] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:07] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:09] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:12] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:15] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:17] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:20] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:22] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:25] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:27] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:31] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:32] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:36] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:37] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:41] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:42] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:46] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:47] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:51] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:52] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:56] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:56:57] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:01] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:02] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:06] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:07] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:11] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:11] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:12] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 14:57:12] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:12] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:12] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:12] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:12] "POST /query HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:12] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:17] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:17] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:22] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:22] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:27] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:27] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:32] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:33] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:37] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:38] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:42] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:43] "GET /projects HTTP/1.1" 200 -
+ * Detected change in '/home/leechuck/Documents/papers/iNaturalist-rub-al-khali/website/app.py', reloading
+Checking for existing projects in Knowledge Graph...
+Found existing projects: ['rub-al-khali']
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 100-988-835
+127.0.0.1 - - [16/Dec/2025 14:57:47] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:48] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:52] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:53] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:58] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:57:58] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:02] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:03] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:07] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:08] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:12] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:13] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:17] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:18] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:22] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:23] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:27] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:28] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:32] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:33] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:37] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:38] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:42] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:43] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:47] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:48] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:52] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:53] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:57] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:58:58] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:01] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:02] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 14:59:02] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:02] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:04] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:04] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 14:59:04] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:07] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:09] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:12] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:14] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:17] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:19] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:22] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:24] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:27] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:28] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:29] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 14:59:29] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:32] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:34] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:37] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:39] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:42] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:44] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:47] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:49] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:52] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:54] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:54] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 14:59:54] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:58] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 14:59:59] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:02] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:04] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:07] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:09] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:12] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:14] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:17] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:19] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:22] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:22] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:22] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 15:00:23] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:28] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:28] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:33] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:33] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:34] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:34] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [16/Dec/2025 15:00:34] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:38] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:39] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:43] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:44] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:48] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:49] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:53] "GET /projects HTTP/1.1" 200 -
+127.0.0.1 - - [16/Dec/2025 15:00:54] "GET /projects HTTP/1.1" 200 -
+Found existing projects: ['rub-al-khali']

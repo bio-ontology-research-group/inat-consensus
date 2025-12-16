@@ -28,16 +28,11 @@
 
 \title{Ontological modeling of dynamic biodiversity consensus}
 
-\author[1]{Robert Hoehndorf}[%
-    email=robert.hoehndorf@kaust.edu.sa,
-    url=https://bio-ontology.org,
-    orgname={King Abdullah University of Science and Technology (KAUST)},
-    orgaddress={Computational Bioscience Research Center, Thuwal, Saudi Arabia}
-]
+
 
 \begin{abstract}
   The digitization of biodiversity in extreme environments, such as the Rub' al Khali (Empty Quarter), relies increasingly on citizen science platforms like iNaturalist. However, the data produced is not static; taxonomic identifications evolve through community consensus, creating a provenance challenge for the Semantic Web. We present a generalized, configurable ETL pipeline and formal OWL 2 DL ontology to model this dynamic ecosystem. Using the Rub' al Khali project as a primary case study, we demonstrate a system that integrates iNaturalist data with the NCBI Taxonomy to detect epistemic conflicts between agents. We separate the TBox (consensus logic) from the ABox (observation data), enabling automated reasoning over conflicting evidence and providing a rigorous structure for integrating shifting classifications into the Linked Open Data cloud.
-end{abstract}
+\end{abstract}
 
 \begin{keywords}
   OWL-DL \sep
@@ -108,7 +103,7 @@ The system was instantiated with data from the Rub' al Khali project (\url{https
 As of February 2026, the dataset comprises 227 observations and 546 identification acts. The hybrid taxonomy contains 269 unique taxa, of which 80 were successfully mapped to NCBI IDs, while 14 remained specific to iNaturalist. The remaining taxa serve as intermediate nodes in the hierarchy.
 
 \subsection{Conflict Analysis}
-The HermiT reasoner successfully classified the ontology, detecting \textbf{10 conflicting observations}. These conflicts represent genuine scientific disagreement or uncertainty that persists despite community voting. For example, Observation \texttt{obs_321457657} was flagged due to active disagreement between two experts on the specific species classification.
+The HermiT reasoner successfully classified the ontology, detecting \textbf{10 conflicting observations}. These conflicts represent genuine scientific disagreement or uncertainty that persists despite community voting. For example, Observation \texttt{obs\_321457657} was flagged due to active disagreement between two experts on the specific species classification.
 
 The "Deep Disjointness" algorithm generated over 33,000 incompatibility assertions, ensuring that the reasoner could detect conflicts at any level of the taxonomic tree, not just between direct siblings.
 

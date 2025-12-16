@@ -10,7 +10,7 @@ echo "Virtuoso is up."
 # Load the OWL file
 # We assume the file is mapped to /data/rub-al-khali.owl inside the container via docker-compose
 echo "Loading ontology..."
-docker-compose exec -T virtuoso isql-v 1111 dba dba exec="ld_dir('/data', 'rub-al-khali.owl', 'http://example.org/rub-al-khali');"
+docker-compose exec -T virtuoso isql-v 1111 dba dba exec="ld_dir('/data', 'rub-al-khali.owl', 'https://rub-al-khali.bio2vec.net/consensus/rub-al-khali');"
 docker-compose exec -T virtuoso isql-v 1111 dba dba exec="rdf_loader_run();"
 docker-compose exec -T virtuoso isql-v 1111 dba dba exec="checkpoint;"
 echo "Data loaded."

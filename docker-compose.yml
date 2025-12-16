@@ -1,4 +1,3 @@
-version: '3'
 services:
   virtuoso:
     image: tenforce/virtuoso
@@ -7,8 +6,10 @@ services:
       - "1111:1111"
     environment:
       SPARQL_UPDATE: "true"
-      DEFAULT_GRAPH: "http://example.org/rub-al-khali"
+      DEFAULT_GRAPH: "https://rub-al-khali.bio2vec.net/consensus"
       VIRT_Parameters_NumberOfBuffers: 10000
       VIRT_Parameters_MaxDirtyBuffers: 6000
+      # Explicitly allow access to the mounted /data directory and subdirectories
+      VIRT_Parameters_DirsAllowed: "., /data"
     volumes:
       - ./project:/data

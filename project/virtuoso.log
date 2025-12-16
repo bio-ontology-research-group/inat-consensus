@@ -1,0 +1,208 @@
+
+		Tue Dec 16 2025
+11:22:32 OpenLink Virtuoso Universal Server
+11:22:32 Version 07.20.3233-pthreads for Linux as of Jun 30 2021
+11:22:32 uses OpenSSL 1.0.2n  7 Dec 2017
+11:22:32 uses parts of PCRE, Html Tidy
+11:22:32 SQL Optimizer enabled (max 1000 layouts)
+11:22:32 Compiler unit is timed at 0.000323 msec
+11:22:33 Checkpoint started
+11:22:33 Roll forward started
+11:22:33 Roll forward complete
+11:22:33 Checkpoint started
+11:22:33 Checkpoint finished, log reused
+11:22:33 Checkpoint started
+11:22:33 Checkpoint finished, log reused
+11:22:33 Checkpoint started
+11:22:33 Checkpoint finished, log reused
+11:22:33 Checkpoint started
+11:22:33 Checkpoint finished, log reused
+11:22:33 Checkpoint started
+11:22:33 Checkpoint finished, log reused
+11:22:33 PL LOG: Installing Virtuoso Conductor version 1.00.8823 (DAV)
+11:22:33 PL LOG: Installing with dependencies Virtuoso Conductor version 1.00.8823/2021-06-30 12:30 (DAV)
+11:22:33 Checkpoint started
+11:22:33 Checkpoint finished, log reused
+11:22:34 Checkpoint started
+11:22:34 Checkpoint finished, log reused
+11:22:34 PL LOG: Installation with dependencies complete
+11:22:34 Checkpoint started
+11:22:34 Checkpoint finished, log reused
+11:22:34 HTTP/WebDAV server online at 27015
+11:22:34 Server online at 1111 (pid 44)
+11:22:34 Server received signal 15
+11:22:34 Initiating quick shutdown
+11:22:34 Server shutdown complete
+
+		Tue Dec 16 2025
+11:22:34 OpenLink Virtuoso Universal Server
+11:22:34 Version 07.20.3233-pthreads for Linux as of Jun 30 2021
+11:22:34 uses OpenSSL 1.0.2n  7 Dec 2017
+11:22:34 uses parts of PCRE, Html Tidy
+11:22:34 Database version 3126
+11:22:34 SQL Optimizer enabled (max 1000 layouts)
+11:22:35 Compiler unit is timed at 0.000109 msec
+11:22:36 Roll forward started
+11:22:36 Roll forward complete
+11:22:36 Checkpoint started
+11:22:36 Checkpoint finished, log reused
+11:22:36 HTTP/WebDAV server online at 8890
+11:22:36 Server online at 1111 (pid 1)
+11:23:07 PL LOG: Loader started
+11:23:07 PL LOG: No more files to load. Loader has finished,
+11:23:08 Checkpoint started
+11:23:08 Checkpoint finished, log reused
+11:29:22 Server received signal 15
+11:29:22 Initiating quick shutdown
+11:29:22 Server shutdown complete
+
+		Tue Dec 16 2025
+11:29:24 OpenLink Virtuoso Universal Server
+11:29:24 Version 07.20.3233-pthreads for Linux as of Jun 30 2021
+11:29:24 uses OpenSSL 1.0.2n  7 Dec 2017
+11:29:24 uses parts of PCRE, Html Tidy
+11:29:24 Database version 3126
+11:29:24 SQL Optimizer enabled (max 1000 layouts)
+11:29:25 Compiler unit is timed at 0.000089 msec
+11:29:25 Roll forward started
+11:29:25 Roll forward complete
+11:29:25 PL LOG: Can't get list of vad packages in /usr/local/virtuoso-opensource/share/virtuoso/vad/
+11:29:25 Checkpoint started
+11:29:25 Checkpoint finished, log reused
+11:29:25 HTTP/WebDAV server online at 8890
+11:29:25 Server online at 1111 (pid 1)
+11:29:26 PL LOG: Loader started
+11:29:26 PL LOG: No more files to load. Loader has finished,
+11:29:26 Checkpoint started
+11:29:26 Checkpoint finished, log reused
+11:30:24 Server received signal 15
+11:30:24 Initiating quick shutdown
+11:30:24 Server shutdown complete
+
+		Tue Dec 16 2025
+11:30:26 OpenLink Virtuoso Universal Server
+11:30:26 Version 07.20.3233-pthreads for Linux as of Jun 30 2021
+11:30:26 uses OpenSSL 1.0.2n  7 Dec 2017
+11:30:26 uses parts of PCRE, Html Tidy
+11:30:26 Database version 3126
+11:30:26 SQL Optimizer enabled (max 1000 layouts)
+11:30:27 Compiler unit is timed at 0.000083 msec
+11:30:27 Roll forward started
+11:30:27 Roll forward complete
+11:30:27 PL LOG: Can't get list of vad packages in /usr/local/virtuoso-opensource/share/virtuoso/vad/
+11:30:27 Checkpoint started
+11:30:27 Checkpoint finished, log reused
+11:30:27 HTTP/WebDAV server online at 8890
+11:30:27 Server online at 1111 (pid 1)
+11:30:56 PL LOG: Loader started
+11:30:56 PL LOG: No more files to load. Loader has finished,
+11:30:56 Checkpoint started
+11:30:56 Checkpoint finished, log reused
+11:33:37 Server received signal 15
+11:33:37 Initiating quick shutdown
+11:33:37 Server shutdown complete
+
+		Tue Dec 16 2025
+11:33:39 OpenLink Virtuoso Universal Server
+11:33:39 Version 07.20.3233-pthreads for Linux as of Jun 30 2021
+11:33:39 uses OpenSSL 1.0.2n  7 Dec 2017
+11:33:39 uses parts of PCRE, Html Tidy
+11:33:39 Database version 3126
+11:33:39 SQL Optimizer enabled (max 1000 layouts)
+11:33:40 Compiler unit is timed at 0.000083 msec
+11:33:41 Roll forward started
+11:33:41 Roll forward complete
+11:33:41 PL LOG: Can't get list of vad packages in /usr/local/virtuoso-opensource/share/virtuoso/vad/
+11:33:41 Checkpoint started
+11:33:41 Checkpoint finished, log reused
+11:33:41 HTTP/WebDAV server online at 8890
+11:33:41 Server online at 1111 (pid 1)
+11:34:08 PL LOG: Loader started
+11:34:08 PL LOG: No more files to load. Loader has finished,
+11:34:08 Checkpoint started
+11:34:08 Checkpoint finished, log reused
+11:50:46 PL LOG: Loader started
+11:50:46 PL LOG: No more files to load. Loader has finished,
+11:50:46 Checkpoint started
+11:50:46 Checkpoint finished, log reused
+11:51:20 PL LOG: Loader started
+11:51:20 PL LOG: No more files to load. Loader has finished,
+11:51:20 Checkpoint started
+11:51:20 Checkpoint finished, log reused
+11:58:50 PL LOG: Loader started
+11:58:51 PL LOG: No more files to load. Loader has finished,
+11:58:51 Checkpoint started
+11:58:51 Checkpoint finished, log reused
+11:59:40 Server received signal 15
+11:59:40 Initiating quick shutdown
+11:59:40 Server shutdown complete
+
+		Tue Dec 16 2025
+11:59:41 OpenLink Virtuoso Universal Server
+11:59:41 Version 07.20.3233-pthreads for Linux as of Jun 30 2021
+11:59:41 uses OpenSSL 1.0.2n  7 Dec 2017
+11:59:41 uses parts of PCRE, Html Tidy
+11:59:41 Database version 3126
+11:59:41 SQL Optimizer enabled (max 1000 layouts)
+11:59:43 Compiler unit is timed at 0.000084 msec
+11:59:43 Roll forward started
+11:59:43 Roll forward complete
+11:59:43 PL LOG: Can't get list of vad packages in /usr/local/virtuoso-opensource/share/virtuoso/vad/
+11:59:43 Checkpoint started
+11:59:43 Checkpoint finished, log reused
+11:59:43 HTTP/WebDAV server online at 8890
+11:59:43 Server online at 1111 (pid 1)
+12:00:09 PL LOG: Loader started
+12:00:09 PL LOG: No more files to load. Loader has finished,
+12:00:09 Checkpoint started
+12:00:09 Checkpoint finished, log reused
+12:00:32 Server received signal 15
+12:00:32 Initiating quick shutdown
+12:00:32 Server shutdown complete
+
+		Tue Dec 16 2025
+12:01:04 OpenLink Virtuoso Universal Server
+12:01:04 Version 07.20.3233-pthreads for Linux as of Jun 30 2021
+12:01:04 uses OpenSSL 1.0.2n  7 Dec 2017
+12:01:04 uses parts of PCRE, Html Tidy
+12:01:04 Database version 3126
+12:01:04 SQL Optimizer enabled (max 1000 layouts)
+12:01:05 Compiler unit is timed at 0.000102 msec
+12:01:05 Roll forward started
+12:01:05 Roll forward complete
+12:01:05 PL LOG: Can't get list of vad packages in /usr/local/virtuoso-opensource/share/virtuoso/vad/
+12:01:05 Checkpoint started
+12:01:05 Checkpoint finished, log reused
+12:01:05 HTTP/WebDAV server online at 8890
+12:01:05 Server online at 1111 (pid 1)
+12:01:31 PL LOG: Loader started
+12:01:31 PL LOG: No more files to load. Loader has finished,
+12:01:32 Checkpoint started
+12:01:32 Checkpoint finished, log reused
+12:16:29 PL LOG: Loader started
+12:16:29 PL LOG: No more files to load. Loader has finished,
+12:16:30 Checkpoint started
+12:16:30 Checkpoint finished, log reused
+12:17:59 Server received signal 15
+12:17:59 Initiating quick shutdown
+12:17:59 Server shutdown complete
+
+		Tue Dec 16 2025
+12:18:01 OpenLink Virtuoso Universal Server
+12:18:01 Version 07.20.3233-pthreads for Linux as of Jun 30 2021
+12:18:01 uses OpenSSL 1.0.2n  7 Dec 2017
+12:18:01 uses parts of PCRE, Html Tidy
+12:18:01 Database version 3126
+12:18:01 SQL Optimizer enabled (max 1000 layouts)
+12:18:02 Compiler unit is timed at 0.000087 msec
+12:18:02 Roll forward started
+12:18:02 Roll forward complete
+12:18:02 PL LOG: Can't get list of vad packages in /usr/local/virtuoso-opensource/share/virtuoso/vad/
+12:18:02 Checkpoint started
+12:18:02 Checkpoint finished, log reused
+12:18:02 HTTP/WebDAV server online at 8890
+12:18:02 Server online at 1111 (pid 1)
+12:18:27 PL LOG: Loader started
+12:18:27 PL LOG: No more files to load. Loader has finished,
+12:18:28 Checkpoint started
+12:18:28 Checkpoint finished, log reused

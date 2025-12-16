@@ -15,7 +15,7 @@ class BiodiversityProject {
     
     // Namespaces
     static final String SIO_NS = "http://semanticscience.org/resource/"
-    static final String EX_NS = "http://example.org/biodiversity/"
+    static final String EX_NS = "https://rub-al-khali.bio2vec.net/consensus/"
     static final String OBO_NS = "http://purl.obolibrary.org/obo/"
     
     // Mappings
@@ -55,6 +55,9 @@ class BiodiversityProject {
         
         OWLOntology ontology = buildOntology(manager, observations)
         
+        // 5. Reasoning
+        runReasoner(manager, ontology)
+
         // 4. Save Ontology (Specific to project)
         File dataDir = new File("projects_data")
         if (!dataDir.exists()) dataDir.mkdirs()
@@ -62,9 +65,6 @@ class BiodiversityProject {
         File callbackFile = new File(dataDir, "${projectSlug}.owl")
         manager.saveOntology(ontology, IRI.create(callbackFile.toURI()))
         println "Ontology saved to ${callbackFile.absolutePath}"
-
-        // 5. Reasoning
-        runReasoner(ontology)
 
         // 6. Report
         generateReport(ontology, observations)
@@ -195,6 +195,8 @@ class BiodiversityProject {
         OWLObjectProperty opIsSuccessorOf = dataFactory.getOWLObjectProperty(IRI.create(SIO_NS + "is-successor-of"))
         OWLDataProperty dpHasValue = dataFactory.getOWLDataProperty(IRI.create(SIO_NS + "has-value"))
         OWLObjectProperty opIncompatibleWith = dataFactory.getOWLObjectProperty(IRI.create(EX_NS + "isIncompatibleWith"))
+        OWLDataProperty dpAsWKT = dataFactory.getOWLDataProperty(IRI.create("http://www.opengis.net/ont/geosparql#asWKT"))
+        OWLDatatype wktLiteral = dataFactory.getOWLDatatype(IRI.create("http://www.opengis.net/ont/geosparql#wktLiteral"))
 
         manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(cIdAct, cProcess))
         manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(cActiveId, cIdAct))
@@ -276,10 +278,28 @@ class BiodiversityProject {
         observations.each { obs ->
             OWLNamedIndividual obsInd = dataFactory.getOWLNamedIndividual(IRI.create(EX_NS + "obs_" + obs.id))
             manager.addAxiom(ontology, dataFactory.getOWLClassAssertionAxiom(cObservation, obsInd))
+            
+            // Location (GeoSPARQL)
+            if (obs.location) {
+                try {
+                    String[] parts = obs.location.split(",") // "lat,lng"
+                    if (parts.length == 2) {
+                        String lat = parts[0].trim()
+                        String lng = parts[1].trim()
+                        String wkt = "POINT(${lng} ${lat})"
+                        manager.addAxiom(ontology, dataFactory.getOWLDataPropertyAssertionAxiom(dpAsWKT, obsInd, dataFactory.getOWLLiteral(wkt, wktLiteral)))
+                    }
+                } catch (Exception e) { println "Error parsing location for ${obs.id}: ${e}" }
+            }
+
             Map<Integer, List> userIds = [:]
             obs.identifications.each { if (it.user) userIds.computeIfAbsent(it.user.id, {[]}).add(it) }
             
             userIds.each { uid, idents ->
+                // Materialize Agent
+                OWLNamedIndividual agentInd = dataFactory.getOWLNamedIndividual(IRI.create(EX_NS + "user_" + uid))
+                manager.addAxiom(ontology, dataFactory.getOWLClassAssertionAxiom(cAgent, agentInd))
+                
                 idents.sort { a, b -> a.created_at <=> b.created_at }
                 OWLNamedIndividual prevInd = null
                 idents.eachWithIndex { ident, index ->
@@ -287,7 +307,8 @@ class BiodiversityProject {
                     manager.addAxiom(ontology, dataFactory.getOWLClassAssertionAxiom(cIdAct, idInd))
                     if (index == idents.size() - 1) manager.addAxiom(ontology, dataFactory.getOWLClassAssertionAxiom(cActiveId, idInd))
                     manager.addAxiom(ontology, dataFactory.getOWLObjectPropertyAssertionAxiom(opHasTarget, idInd, obsInd))
-                    
+                    manager.addAxiom(ontology, dataFactory.getOWLObjectPropertyAssertionAxiom(opHasAgent, idInd, agentInd))
+
                     if (ident.taxon && finalClassMap.containsKey(ident.taxon.id as Integer)) {
                         manager.addAxiom(ontology, dataFactory.getOWLObjectPropertyAssertionAxiom(opHasOutput, idInd, dataFactory.getOWLNamedIndividual(finalClassMap[ident.taxon.id as Integer])))
                     }
@@ -300,12 +321,19 @@ class BiodiversityProject {
         return ontology
     }
 
-    void runReasoner(OWLOntology ontology) {
+    void runReasoner(OWLOntologyManager manager, OWLOntology ontology) {
         println "Running HermiT..."
         OWLReasoner reasoner = new ReasonerFactory().createReasoner(ontology)
         println "Consistent? ${reasoner.isConsistent()}"
-        def conflicts = reasoner.getInstances(dataFactory.getOWLClass(IRI.create(EX_NS + "ConflictingObservation")), false)
+        OWLClass cConflicting = dataFactory.getOWLClass(IRI.create(EX_NS + "ConflictingObservation"))
+        def conflicts = reasoner.getInstances(cConflicting, false)
         println "Conflicts: ${conflicts.nodes.size()}"
+        
+        conflicts.nodes.each { node ->
+             node.entities.each { ind ->
+                 manager.addAxiom(ontology, dataFactory.getOWLClassAssertionAxiom(cConflicting, ind))
+             }
+        }
     }
 
     void generateReport(OWLOntology ontology, List<Map> observations) {

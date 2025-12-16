@@ -1,0 +1,13 @@
+[project]
+name = "biodiversity-consensus-dashboard"
+version = "0.1.0"
+description = "Web dashboard for Biodiversity Consensus Ontology"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "flask",
+    "requests"
+]
+
+[tool.uv]
+dev-dependencies = []
