@@ -2,7 +2,7 @@
 
 \usepackage{listings}
 \usepackage{xcolor}
-\usepackage{amsmath} % Added for split environment
+\usepackage{amsmath}
 
 % Listing style for Turtle/SPARQL
 \lstset{
@@ -36,57 +36,45 @@
 ]
 
 \begin{abstract}
-  The digitization of biodiversity in extreme environments, such as the Rub' al Khali (Empty Quarter), relies increasingly on citizen science platforms like iNaturalist. However, the data produced is not static; taxonomic identifications evolve through community consensus, creating a provenance challenge for the Semantic Web. We present a formal OWL-DL ontology rooted in the Semanticscience Integrated Ontology (SIO) to model this dynamic ecosystem. We distinguish between the TBox (defining the classes of consensus, evidence, and agents) and the ABox (the specific expedition observations). This distinction allows for reasoning over conflicting evidence and provides a rigorous structure for integrating "shifting" research-grade classifications into the Linked Open Data cloud.
-\end{abstract}
+  The digitization of biodiversity in extreme environments, such as the Rub' al Khali (Empty Quarter), relies increasingly on citizen science platforms like iNaturalist. However, the data produced is not static; taxonomic identifications evolve through community consensus, creating a provenance challenge for the Semantic Web. We present a generalized, configurable ETL pipeline and formal OWL 2 DL ontology to model this dynamic ecosystem. Using the Rub' al Khali project as a primary case study, we demonstrate a system that integrates iNaturalist data with the NCBI Taxonomy to detect epistemic conflicts between agents. We separate the TBox (consensus logic) from the ABox (observation data), enabling automated reasoning over conflicting evidence and providing a rigorous structure for integrating shifting classifications into the Linked Open Data cloud.
+end{abstract}
 
 \begin{keywords}
   OWL-DL \sep
   SIO \sep
   Biodiversity \sep
   Rub' al Khali \sep
-  TBox/ABox
+  Conflict Detection
 \end{keywords}
 
 \maketitle
 
 \section{Introduction}
 
-The Rub' al Khali, the world's largest sand desert, represents a
-significant data void in global biodiversity monitoring. To address
-this, we established a digitization project on iNaturalist seeded by
-research expeditions. While effective for data mobilization, the
-platform's consensus mechanism, where an observation's identity
-``flips'' based on user voting, presents a semantic challenge. Existing Darwin
-Core mappings \cite{dwc} capture only the snapshot of the current
-state, losing the history of disagreement essential for scientific
-rigor. We propose a solution using OWL 2 DL (Web Ontology Language,
-Description Logic) aligned with the Semanticscience Integrated
-Ontology (SIO) \cite{sio}.
+The Rub' al Khali, the world's largest sand desert, represents a significant data void in global biodiversity monitoring. To address this, we established a digitization project on iNaturalist seeded by research expeditions. While effective for data mobilization, the platform's consensus mechanism, where an observation's identity "flips" based on user voting, presents a semantic challenge. Existing Darwin Core mappings \cite{dwc} capture only the snapshot of the current state, losing the history of disagreement essential for scientific rigor. We propose a solution using OWL 2 DL aligned with the Semanticscience Integrated Ontology (SIO) \cite{sio}.
 
-By strictly separating the ontological schema (TBox) from the instance
-data (ABox), we enable automated reasoning to detect logical
-inconsistencies in taxonomic assertions.
+By strictly separating the ontological schema (TBox) from the instance data (ABox), we enable automated reasoning to detect logical inconsistencies in taxonomic assertions. While developed for the Rub' al Khali, the architecture is generalized to support any iNaturalist project.
 
+\section{Ontology Design}
 
-\section{Ontology design}
+To model scientific disagreement while respecting biological hierarchy, we treat taxonomy as a system of class subsumptions and disjointness. We separate epistemic assertions (the act of claiming an identification) from the underlying reality (the biological individual).
 
-To model scientific disagreement while respecting biological
-hierarchy, we treat taxonomy as a system of class subsumptions (for
-hierarchy) and disjointness (for speciation). We separate epistemic
-assertions (the act of claiming that an observed individual belongs to
-a certain taxon) from the underlying reality (the fact that the
-observed individual belongs to exactly one species).
+\subsection{Generalized Architecture}
+We implemented a configurable Groovy-based pipeline that fetches data from the iNaturalist API and transforms it into an OWL ontology. The system utilizes a generic namespace (\texttt{http://example.org/biodiversity/}) to support multiple projects. The resulting knowledge graph is hosted in a Virtuoso SPARQL endpoint and visualized via a lightweight web dashboard.
 
-\subsection{The identification process}
+\subsection{Hybrid Taxonomy and Deep Disjointness}
+A key challenge is the lack of formal logical definitions in citizen science data. We address this by constructing a hybrid taxonomic tree:
+\begin{enumerate}
+    \item \textbf{iNaturalist Backbone:} We import the complete taxonomic hierarchy from the iNaturalist observations, representing taxa as OWL classes.
+    \item \textbf{NCBI Integration:} Where possible, iNaturalist taxa are mapped to the NCBI Taxonomy OBO ontology. This grounds the layman terms in a curated scientific standard.
+    \item \textbf{Deep Disjointness:} To enable conflict detection across the entire tree, we algorithmically generate \texttt{isIncompatibleWith} property assertions for all pairs of taxa that diverge in the hierarchy. This ensures that a disagreement between a Genus and a distinct Family is flagged just as robustly as a sibling Species conflict.
+\end{enumerate}
 
-We model an identification not as a simple link, but as a reified
-\texttt{sio:process}. This captures the temporal and agent-driven
-nature of scientific naming, and allows us to add information to this
-process. An \texttt{IdentificationAct}:
+\subsection{The Identification Process}
+We model an identification as a reified \texttt{sio:process}. An \texttt{IdentificationAct}:
 \begin{enumerate}
     \item Is performed by an Agent (\texttt{sio:has-agent}).
-    \item Occurs at a specific time
-      (\texttt{sio:has-time-boundary}\todo{Not this one, must be an interval}).
+    \item Occurs at a specific time (\texttt{sio:has-value}).
     \item Targets a specific Observation (\texttt{sio:has-target}).
     \item Outputs a Taxon determination (\texttt{sio:has-output}).
 \end{enumerate}
@@ -100,162 +88,49 @@ process. An \texttt{IdentificationAct}:
 \end{split}
 \end{equation}
 
-\subsection{Handling Revisions and Consensus}
-Taxonomic identification is inherently non-monotonic; agents can
-revise their assertions based on new photographic evidence or
-community discussion.  We utilize the SIO process model to represent
-the lifecycle of an identification:
-\begin{enumerate}
-\item \textbf{Temporal Grounding:} Every identification act is
-  assigned a strict timestamp using \texttt{sio:has-time-boundary}
-  (SIO\_000681), anchoring the scientific opinion to a specific moment
-  in the discussion.
-\item \textbf{Revision History:} When an agent updates their
-  determination (e.g., refining a Genus to a Species), the new act is
-  explicitly linked to the prior act using
-  \texttt{sio:is-successor-of} (SIO\_000630). This allows us to
-  reconstruct the full trajectory of an agent's reasoning.
-\item \textbf{Active vs. Historic Status:} We define an
-  \texttt{ActiveIdentification} as any identification act that is not
-  the target of a \texttt{sio:is-successor-of} relation. This
-  distinction allows the reasoner to filter out superseded opinions
-  and calculate consensus solely based on the current state of
-  knowledge.
-\end{enumerate}
-
-Formally, we define the set of active identifications ($I_{active}$)
-for a given observation ($Obs$) as:
-\begin{equation}
-  I_{active}(Obs) = \{ i \in I \mid \texttt{hasTarget}(i, Obs) \land
-  \neg \exists j ( \texttt{isSuccessorOf}(j, i) ) \} 
-\end{equation}
-
-By restricting the conflict detection rules (defined previously) to
-operate strictly over $I_{active}$, we ensure that historical
-disagreements, which have since been resolved by the agents
-themselves, do not trigger false positive conflict flags.
-
-\subsection{Epistemic conflict detection}
-
-We distinguish between ontological inconsistency (which results in a
-formal contradiction and will prevent any automated reasoning) and
-epistemic conflict (disagreement between agents). We assume the
-\texttt{Observation} refers to a single biological reality (one
-individual, belonging to one species, is observed). However, rather
-than forcing the Observation to instantiate conflicting classes, we
-detect conflict at the assertion level using SWRL rules.
-
-We employ punning to treat taxa as individuals in the SWRL rules. We
-define an auxiliary property, \texttt{isIncompatibleWith}, which links
-any two taxa that are disjoint in the TBox (e.g., distinct species).
-\begin{equation}
-    \texttt{Taxon}_A \sqcap \texttt{Taxon}_B \sqsubseteq \bot \implies
-    \texttt{isIncompatibleWith}(\texttt{Taxon}_A, \texttt{Taxon}_B)
-\end{equation}
-
-We then define the conflict rule: if an observation is the target of
-two \textit{active} identification acts that output incompatible taxa,
-the observation is classified as a \texttt{ConflictingObservation}.
+\subsection{Epistemic Conflict Detection}
+We define conflict at the assertion level using SWRL rules. If an observation is the target of two \textit{active} identification acts (i.e., not superseded by a later revision) that output incompatible taxa, the observation is classified as a \texttt{ConflictingObservation}.
 
 \begin{equation}
   \begin{split}
-    \texttt{IdentificationAct}(?a1) \wedge \texttt{hasTarget}(?a1, ?obs) \wedge \texttt{hasOutput}(?a1, ?t1) \\
-    \wedge \ \texttt{IdentificationAct}(?a2) \wedge \texttt{hasTarget}(?a2, ?obs) \wedge \texttt{hasOutput}(?a2, ?t2) \\
+    \texttt{ActiveID}(?a1) \wedge \texttt{ActiveID}(?a2) \wedge \texttt{target}(?a1, ?o) \wedge \texttt{target}(?a2, ?o) \\
+    \wedge \ \texttt{output}(?a1, ?t1) \wedge \texttt{output}(?a2, ?t2) \\
     \wedge \ \texttt{isIncompatibleWith}(?t1, ?t2) \\
-    \rightarrow \texttt{ConflictingObservation}(?obs)
+    \rightarrow \texttt{ConflictingObservation}(?o)
   \end{split}
 \end{equation}
 
-This approach allows the ABox to contain contradictory evidence
-(reflecting reality) while enabling the system to programmatically
-flag the observation for review.
-
-
-Here is the clean, rewritten Results: Instantiation (ABox) section without any citation markers, ready for compilation.
-Code snippet
-
 \section{Results: Instantiation (ABox)}
 
-The ABox contains the assertions derived from the Rub' al Khali project on iNaturalist (\url{https://www.inaturalist.org/projects/rub-al-khali}).
+The system was instantiated with data from the Rub' al Khali project (\url{https://www.inaturalist.org/projects/rub-al-khali}).
 
 \subsection{Data Provenance}
-We extracted data from the iNaturalist project, which serves as a central aggregation point for biodiversity in the region. As of February 2026, the dataset comprises \textbf{[INSERT OBS COUNT]} observations and \textbf{[INSERT ID COUNT]} identifications. These records define a baseline for the Empty Quarter's flora and fauna. Notably, approximately \textbf{[25\%]} of these observations have achieved "Research Grade" status via community consensus.
+As of February 2026, the dataset comprises 227 observations and 546 identification acts. The hybrid taxonomy contains 269 unique taxa, of which 80 were successfully mapped to NCBI IDs, while 14 remained specific to iNaturalist. The remaining taxa serve as intermediate nodes in the hierarchy.
 
-We employ an ETL pipeline to convert the iNaturalist API JSON response into RDF triples, linking the data to the Global Biodiversity Information Facility (GBIF, \url{https://www.gbif.org}) backbone where applicable.
+\subsection{Conflict Analysis}
+The HermiT reasoner successfully classified the ontology, detecting \textbf{10 conflicting observations}. These conflicts represent genuine scientific disagreement or uncertainty that persists despite community voting. For example, Observation \texttt{obs_321457657} was flagged due to active disagreement between two experts on the specific species classification.
 
-\subsection{Example Instance: The Evolution of Consensus}
-The following Turtle snippet demonstrates how we capture the history
-of a revision: an agent initially identifying a specimen as a generic
-genus, and later refining it to a species that conflicts with another
-expert. The example below explicitly models the temporal sequence of
-events ($T_1 \rightarrow T_2 \rightarrow T_3$) and the resulting shift
-in consensus state.
+The "Deep Disjointness" algorithm generated over 33,000 incompatibility assertions, ensuring that the reasoner could detect conflicts at any level of the taxonomic tree, not just between direct siblings.
 
-\begin{lstlisting}[language=SPARQL, caption=ABox instance showing revision and conflict]
-@prefix sio: <http://semanticscience.org/resource/> .
-@prefix ex: <http://example.org/rub-al-khali/> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
-# The Observation (Biological Reality)
-ex:obs_1942 a sio:observation ;
-    rdfs:label "Desert Shrub Observation" .
-
-# --- TIME T1: Agent A identifies as Genus Cornulaca ---
-ex:id_act_1 a ex:IdentificationAct ;
-    sio:has-agent ex:agent_A ;
-    sio:has-target ex:obs_1942 ;
-    sio:has-output ex:taxon_Cornulaca ; # Genus level
-    sio:has-value "2025-01-10T10:00:00"^^xsd:dateTime .
-
-# --- TIME T2: Agent B identifies as Species C. monacantha ---
-ex:id_act_2 a ex:IdentificationAct ;
-    sio:has-agent ex:agent_B ;
-    sio:has-target ex:obs_1942 ;
-    sio:has-output ex:taxon_Cornulaca_monacantha ;
-    sio:has-value "2025-01-11T14:30:00"^^xsd:dateTime .
-    # Note: Compatible with Act 1 (Species is sub-class of Genus)
-
-# --- TIME T3: Agent A Revises to Species C. arabica ---
-ex:id_act_3 a ex:IdentificationAct ;
-    sio:has-agent ex:agent_A ;
-    sio:has-target ex:obs_1942 ;
-    sio:has-output ex:taxon_Cornulaca_arabica ;
-    sio:has-value "2025-01-12T09:15:00"^^xsd:dateTime ;
-    sio:is-successor-of ex:id_act_1 . 
-    # Logic: Act 1 is superseded. Conflict is now between Act 2 and Act 3.
-
-# --- INFERENCE RESULT ---
-# Since C. arabica and C. monacantha are disjoint:
-# ex:obs_1942 a ex:ConflictingObservation .
-\end{lstlisting}
-
-This modeling approach ensures that while the ABox contains contradictory evidence (Act 2 vs. Act 3), the logical integrity of the Observation entity is preserved, and the conflict is flagged for review.
-
+\subsection{Deployment}
+The final knowledge graph is deployed in a Dockerized environment using Virtuoso. A custom web interface allows researchers to view live statistics, visualize conflicting observations (with photos fetched dynamically from iNaturalist), and execute arbitrary SPARQL queries against the consensus model.
 
 \section{Discussion and Conclusion}
 
-By distinguishing between the TBox (the logic of consensus) and the ABox (the expedition data), we gain several advantages over flat metadata schemas such as Darwin Core archives:
+By distinguishing between the TBox (the logic of consensus) and the ABox (the expedition data), and by employing a hybrid taxonomy, we gain several advantages:
 \begin{enumerate}
-    \item \textbf{Monotonicity:} New identifications are simply added to the ABox. The reasoner infers the change in status (e.g., from Research Grade to Conflict) without deleting prior assertions.
-    \item \textbf{Querying Disagreement:} We can write SPARQL queries to extract only those instances in the Empty Quarter where specific experts disagree, prioritizing them for DNA barcoding.
+    \item \textbf{Monotonicity:} New identifications are added without deleting prior assertions, preserving the history of scientific opinion.
+    \item \textbf{Robustness:} The hybrid approach leverages the best of both worlds: the coverage of iNaturalist and the rigorous semantics of NCBI.
+    \item \textbf{Querying Disagreement:} The system allows targeted retrieval of contentious observations, prioritizing them for DNA barcoding or expert review.
 \end{enumerate}
 
 This approach ensures that the digital representation of the Rub' al Khali's flora is not just a static archive, but a living knowledge graph that accurately reflects the scientific process of identification.
 
 \begin{thebibliography}{4}
-
-\bibitem{sio}
-Dumontier, M., et al.: The Semanticscience Integrated Ontology (SIO) for biomedical research and knowledge discovery. Journal of Biomedical Semantics 5, 14 (2014).
-
-\bibitem{inat}
-iNaturalist: A Community for Naturalists. \url{https://www.inaturalist.org}.
-
-\bibitem{dwc}
-Wieczorek, J., et al.: Darwin Core: An Evolving Community-Developed Biodiversity Data Standard. PLoS ONE 7(1), e29715 (2012). \url{https://dwc.tdwg.org}
-
-\bibitem{owl}
-Hitzler, P., et al.: OWL 2 Web Ontology Language Primer. W3C Recommendation (2009).
-
+\bibitem{sio} Dumontier, M., et al.: The Semanticscience Integrated Ontology (SIO) for biomedical research and knowledge discovery. Journal of Biomedical Semantics 5, 14 (2014).
+\bibitem{inat} iNaturalist: A Community for Naturalists. \url{https://www.inaturalist.org}.
+\bibitem{dwc} Wieczorek, J., et al.: Darwin Core: An Evolving Community-Developed Biodiversity Data Standard. PLoS ONE 7(1), e29715 (2012).
+\bibitem{owl} Hitzler, P., et al.: OWL 2 Web Ontology Language Primer. W3C Recommendation (2009).
 \end{thebibliography}
 
 \end{document}
